@@ -40,8 +40,18 @@ const __dirname = path.dirname(__filename);
 const app = express();
 dotenv.config();
 
-// 1. Connect Database
-connectDB();
+// 1. Connect Database (Initial check + Serverless Middleware)
+connectDB().catch(err => console.error("Initial MongoDB connection failed:", err.message));
+
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
 
 app.use((req, res, next) => {
     console.log(`[HTTP] ${req.method} ${req.url}`);
