@@ -1,17 +1,29 @@
 import jwt from 'jsonwebtoken';
 
 /**
+ * Safely cleans surrounding quotes and spaces from environment variables.
+ */
+const cleanExpiry = (val, defaultVal) => {
+    if (!val || typeof val !== 'string') return defaultVal;
+    const cleaned = val.replace(/^["']|["']$/g, '').trim();
+    return cleaned || defaultVal;
+};
+
+/**
  * Generates and sets access and refresh tokens in secure cookies.
  */
 const generateTokens = (res, userId) => {
+    const accessExpire = cleanExpiry(process.env.ACCESS_TOKEN_EXPIRE, '15m');
+    const refreshExpire = cleanExpiry(process.env.REFRESH_TOKEN_EXPIRE, '7d');
+
     // 1. Generate Access Token (Short-lived)
     const accessToken = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRE || '15m',
+        expiresIn: accessExpire,
     });
 
     // 2. Generate Refresh Token (Long-lived)
     const refreshToken = jwt.sign({ id: userId }, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRE || '7d',
+        expiresIn: refreshExpire,
     });
 
     // 3. Set Cookie Options
@@ -37,4 +49,5 @@ const generateTokens = (res, userId) => {
 };
 
 export default generateTokens;
+
 
