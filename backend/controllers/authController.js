@@ -115,12 +115,18 @@ const logoutUser = asyncHandler(async (req, res) => {
         );
     }
 
-    res.cookie('accessToken', '', {
+    const commonCookieOptions = {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    };
+
+    res.cookie('accessToken', '', {
+        ...commonCookieOptions,
         expires: new Date(0),
     });
     res.cookie('refreshToken', '', {
-        httpOnly: true,
+        ...commonCookieOptions,
         expires: new Date(0),
     });
 
