@@ -47,7 +47,7 @@ const TransactionTableRow = ({ tx, idx, pInfo, isAdminOrSupervisor, activeDropdo
             </td>
             <td className="px-6 py-5 text-right">
                 <div className="flex items-baseline justify-end gap-1">
-                    <span className="text-[10px] font-black text-neutral-300">Rs.</span>
+                    <span className="text-[10px] font-black text-neutral-300">€</span>
                     <span className="text-[13px] font-black text-brand-600 tracking-tighter">
                         {(tx.totalPayout || (tx.amount * tx.exchangeRate + tx.fees)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </span>

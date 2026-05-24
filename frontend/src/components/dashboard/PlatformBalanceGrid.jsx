@@ -89,7 +89,7 @@ const PlatformBalanceGrid = ({ platforms, loading }) => {
                             <div className="flex justify-between items-center group/row">
                                 <p className="text-xs font-bold text-neutral-400 group-hover/row:text-neutral-600 transition-colors">Brought Fwd</p>
                                 <p className="text-sm font-bold text-neutral-900 tracking-tight uppercase">
-                                    <span className="text-[12px] text-neutral-400 mr-2">LKR</span>
+                                    <span className="text-[12px] text-neutral-400 mr-2">€</span>
                                     {platform.openingBalanceLkr?.toLocaleString() || '0'}
                                 </p>
                             </div>
@@ -97,7 +97,7 @@ const PlatformBalanceGrid = ({ platforms, loading }) => {
                             <div className="flex justify-between items-center group/row">
                                 <p className="text-xs font-bold text-neutral-400 group-hover/row:text-neutral-600 transition-colors">Send</p>
                                 <p className="text-sm font-bold text-rose-500 tracking-tight uppercase">
-                                    <span className="text-[12px] text-rose-300 mr-2 group-hover/row:mr-3 transition-all ">- LKR</span>
+                                    <span className="text-[12px] text-rose-300 mr-2 group-hover/row:mr-3 transition-all ">+ €</span>
                                     {platform.todaySendLkr?.toLocaleString() || '0'}
                                 </p>
                             </div>
@@ -105,7 +105,7 @@ const PlatformBalanceGrid = ({ platforms, loading }) => {
                             <div className="flex justify-between items-center group/row">
                                 <p className="text-xs font-bold text-neutral-400 group-hover/row:text-neutral-600 transition-colors">Paid</p>
                                 <p className="text-sm font-bold text-brand-500 tracking-tight uppercase">
-                                    <span className="text-[12px] text-brand-300 mr-2">- LKR</span>
+                                    <span className="text-[12px] text-brand-300 mr-2">- €</span>
                                     {platform.todayPaidLkr > 0 ? platform.todayPaidLkr?.toLocaleString() : '0'}
                                 </p>
                             </div>
@@ -113,7 +113,7 @@ const PlatformBalanceGrid = ({ platforms, loading }) => {
                             <div className="flex justify-between items-center group/row pb-1">
                                 <p className="text-xs font-bold text-neutral-400 group-hover/row:text-neutral-600 transition-colors">Deposit</p>
                                 <p className="text-sm font-bold text-emerald-500 tracking-tight uppercase">
-                                    <span className="text-[12px] text-emerald-300 mr-2">+ LKR</span>
+                                    <span className="text-[12px] text-emerald-300 mr-2">+ €</span>
                                     {platform.todayDepositLkr?.toLocaleString() || '0'}
                                 </p>
                             </div>
@@ -123,14 +123,14 @@ const PlatformBalanceGrid = ({ platforms, loading }) => {
                         <div className={`mt-4 bg-[#fef7f8] px-4 py-3 rounded-xl flex justify-between items-center border border-[#F9F1E7] ${expandedPlatformId === (platform.platformId || platform.id) ? 'max-w-md' : ''}`}>
                             <p className="text-[12px] font-bold text-[#D49D66] uppercase tracking-tight">Balance</p>
                             <p className="text-lg font-bold text-[#8B4513] tracking-tight uppercase">
-                                <span className="text-[12px] text-[#D49D66] mr-2">LKR</span>
+                                <span className="text-[12px] text-[#D49D66] mr-2">€</span>
                                 {platform.currentBalanceLkr?.toLocaleString() || '0'}
                             </p>
                         </div>
 
                         {/* Action Button: Initiate */}
                         <div className="mt-5">
-                            <button 
+                            <button
                                 onClick={() => setExpandedPlatformId(expandedPlatformId === (platform.platformId || platform.id) ? null : (platform.platformId || platform.id))}
                                 className="w-full bg-brand-600 hover:bg-brand-700 text-white py-4 rounded-2xl flex items-center justify-center gap-4 transition-all duration-300 shadow-2xl shadow-brand-600/30 group/btn active:scale-[0.98] cursor-pointer font-bold uppercase text-sm"
                             >
@@ -154,9 +154,9 @@ const PlatformBalanceGrid = ({ platforms, loading }) => {
                                     exit={{ opacity: 0, height: 0 }}
                                     className="overflow-hidden mt-6 pt-6 border-t border-neutral-100"
                                 >
-                                    <TransactionEntry 
-                                        initialPlatform={platform.slug || platform.platformId} 
-                                        onComplete={() => setExpandedPlatformId(null)} 
+                                    <TransactionEntry
+                                        initialPlatform={platform.slug || platform.platformId}
+                                        onComplete={() => setExpandedPlatformId(null)}
                                     />
                                 </motion.div>
                             )}

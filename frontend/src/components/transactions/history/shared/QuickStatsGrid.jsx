@@ -76,24 +76,24 @@ const QuickStatsGrid = React.memo(({ stats, loading }) => {
     const cards = [
         {
             title: "Total Volume",
-            value: `Rs. ${summary.totalVolume.toLocaleString()}`,
-            subtitle: "LKR",
+            value: `€ ${summary.totalVolume.toLocaleString()}`,
+            subtitle: "EUR",
             icon: FiActivity,
             color: "brand",
             trend: summary.totalVolume > 0 ? 12.5 : null
         },
         {
             title: "Total Paid",
-            value: `Rs. ${summary.receiveAmount.toLocaleString()}`,
-            subtitle: "LKR",
+            value: `€ ${summary.receiveAmount.toLocaleString()}`,
+            subtitle: "EUR",
             icon: FiArrowDownLeft,
             color: "emerald",
             trend: summary.receiveAmount > 0 ? 8.2 : null
         },
         {
             title: "Total Sent",
-            value: `Rs. ${summary.sendAmount.toLocaleString()}`,
-            subtitle: "LKR",
+            value: `€ ${summary.sendAmount.toLocaleString()}`,
+            subtitle: "EUR",
             icon: FiArrowUpRight,
             color: "rose",
             trend: summary.sendAmount > 0 ? -4.1 : null

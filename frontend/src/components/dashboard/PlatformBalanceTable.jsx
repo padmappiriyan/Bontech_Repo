@@ -128,7 +128,7 @@ const PlatformBalanceTable = ({ platforms, loading, isClosed }) => {
                         <div className={`mt-2 pt-4 border-t border-[#F1F5F9] flex justify-between items-center ${expandedPlatformId === (platform.platformId || platform.id) ? 'max-w-md' : ''}`}>
                             <p className="text-[10px] font-black text-[#1E293B] uppercase tracking-wider">Balance</p>
                             <p className="text-base font-black text-[#1E293B] tracking-tight">
-                                <span className="text-[12px] font-bold mr-1">LKR</span>
+                                <span className="text-[12px] font-bold mr-1">EUR (€)</span>
                                 {platform.currentBalanceLkr?.toLocaleString() || '0'}
                             </p>
                         </div>

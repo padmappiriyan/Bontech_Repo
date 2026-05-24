@@ -23,9 +23,7 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
 
     const {
         activePlatforms,
-        globalRates,
         loadActivePlatforms,
-        loadRates
     } = useSettings();
 
     const { balances: myBalances } = useSelector((state) => state.userBalance);
@@ -36,7 +34,7 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
         senderName: '',
         receiverName: '',
         amount: '',
-        currency: 'USD',
+        currency: 'EUR',
         exchangeRate: 1.0,
         fees: 0,
         remarks: ''
@@ -46,9 +44,8 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
 
     useEffect(() => {
         loadActivePlatforms();
-        loadRates();
         dispatch(fetchMyBalances());
-    }, [loadActivePlatforms, loadRates, dispatch]);
+    }, [loadActivePlatforms, dispatch]);
 
     // Calculate total payout in real-time
     useEffect(() => {
@@ -59,15 +56,7 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
         setTotalPayout(total.toFixed(2));
     }, [formData.amount, formData.exchangeRate, formData.fees]);
 
-    // Auto-update exchange rate when currency changes
-    useEffect(() => {
-        if (globalRates.length > 0) {
-            const config = globalRates.find(r => r.sourceCurrency === formData.currency);
-            if (config) {
-                setFormData(prev => ({ ...prev, exchangeRate: config.rate.toString() }));
-            }
-        }
-    }, [formData.currency, globalRates]);
+    // EUR-only: exchange rate is always 1.0 — no LKR conversion needed
 
     // Handle form reset and status cleanup on success
     useEffect(() => {
@@ -84,7 +73,7 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
                 senderName: '',
                 receiverName: '',
                 amount: '',
-                currency: 'USD',
+                currency: 'EUR',
                 exchangeRate: 1.0,
                 fees: 0,
                 remarks: ''
@@ -137,7 +126,7 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
                 senderName: '',
                 receiverName: '',
                 amount: '',
-                currency: 'USD',
+                currency: 'EUR',
                 exchangeRate: 1.0,
                 fees: 0,
                 remarks: ''

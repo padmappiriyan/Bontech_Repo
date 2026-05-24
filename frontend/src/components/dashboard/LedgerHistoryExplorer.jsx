@@ -4,7 +4,7 @@ import { FiCalendar, FiActivity } from 'react-icons/fi';
 import { fetchPlatformHistory } from '../../api/reportsApi';
 import toast from 'react-hot-toast';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
+    AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
 
 const LedgerHistoryExplorer = () => {
@@ -15,8 +15,8 @@ const LedgerHistoryExplorer = () => {
     const [histories, setHistories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('Global Master');
-    
-    
+
+
     const { lastUpdated } = useSelector((state) => state.userBalance);
 
     // Handle Quick Ranges
@@ -115,7 +115,7 @@ const LedgerHistoryExplorer = () => {
     const formatCurrency = (val) => {
         if (!val) return '0.00';
         // Match the specific string layout requested (e.g., 211 175,00)
-        return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, ' '); 
+        return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, ' ');
     };
 
     // Chart Data Preparation - Chart needs to go forward chronologically left to right
@@ -131,7 +131,7 @@ const LedgerHistoryExplorer = () => {
             return (
                 <div className="bg-white border border-neutral-100 p-3 rounded-lg shadow-lg">
                     <p className="text-[#1E293B] font-bold text-sm mb-1">{label}</p>
-                    <p className="text-brand-600 font-bold text-[13px]">Rs. {formatCurrency(payload[0].value)}</p>
+                    <p className="text-brand-600 font-bold text-[13px]">EUR (€). {formatCurrency(payload[0].value)}</p>
                 </div>
             );
         }
@@ -154,11 +154,10 @@ const LedgerHistoryExplorer = () => {
                         <button
                             key={range}
                             onClick={() => setRangeType(range)}
-                            className={`px-3 py-1.5 rounded-[8px] text-[12px] font-bold transition-all ${
-                                rangeType === range 
-                                ? 'bg-white text-brand-600 shadow-sm border border-neutral-100 ring-1 ring-brand-100' 
+                            className={`px-3 py-1.5 rounded-[8px] text-[12px] font-bold transition-all ${rangeType === range
+                                ? 'bg-white text-brand-600 shadow-sm border border-neutral-100 ring-1 ring-brand-100'
                                 : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50'
-                            }`}
+                                }`}
                         >
                             {range}
                         </button>
@@ -171,8 +170,8 @@ const LedgerHistoryExplorer = () => {
                 <div className="flex items-center gap-3 mb-6 bg-white p-3 rounded-2xl w-max shadow-sm border border-neutral-200">
                     <div className="flex items-center gap-2 bg-neutral-50 px-4 py-2 rounded-xl focus-within:border-brand-500 transition-all">
                         <FiCalendar className="text-neutral-400" />
-                        <input 
-                            type="date" 
+                        <input
+                            type="date"
                             value={historyStartDate}
                             onChange={(e) => setHistoryStartDate(e.target.value)}
                             className="bg-transparent border-none text-sm font-bold text-neutral-700 outline-none w-full"
@@ -181,8 +180,8 @@ const LedgerHistoryExplorer = () => {
                     <span className="text-neutral-400 font-medium text-sm">to</span>
                     <div className="flex items-center gap-2 bg-neutral-50 px-4 py-2 rounded-xl focus-within:border-brand-500 transition-all">
                         <FiCalendar className="text-neutral-400" />
-                        <input 
-                            type="date" 
+                        <input
+                            type="date"
                             value={historyEndDate}
                             onChange={(e) => setHistoryEndDate(e.target.value)}
                             className="bg-transparent border-none text-sm font-bold text-neutral-700 outline-none w-full"
@@ -194,7 +193,7 @@ const LedgerHistoryExplorer = () => {
 
             {/* ── WHITE CONTAINER CARD ── */}
             <div className="bg-white rounded-[20px] p-6 sm:p-8 border border-neutral-200 shadow-sm">
-                
+
                 {/* TABS */}
                 <div className="flex overflow-x-auto no-scrollbar border-b border-neutral-200 mb-8 pb-1">
                     <div className="flex items-center gap-8 pl-2">
@@ -202,11 +201,10 @@ const LedgerHistoryExplorer = () => {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`text-[14px] font-semibold tracking-wide whitespace-nowrap pb-4 border-b-2 transition-all relative ${
-                                    activeTab === tab 
-                                    ? 'border-brand-600 text-brand-600' 
+                                className={`text-[14px] font-semibold tracking-wide whitespace-nowrap pb-4 border-b-2 transition-all relative ${activeTab === tab
+                                    ? 'border-brand-600 text-brand-600'
                                     : 'border-transparent text-neutral-500 hover:text-neutral-800 hover:border-neutral-300'
-                                }`}
+                                    }`}
                             >
                                 {tab === 'Global Master' && <span className="mr-2 opacity-80 inline-block w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-brand-400 to-indigo-500 shadow-sm"></span>}
                                 {tab}
@@ -225,56 +223,56 @@ const LedgerHistoryExplorer = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             <div className="bg-neutral-50/70 p-6 rounded-[16px] border border-neutral-100 transition-all hover:shadow-sm">
                                 <p className="text-[12px] text-neutral-500 font-semibold mb-2">Total Send</p>
-                                <p className="text-[26px] font-black text-emerald-600">Rs. {formatCurrency(totalSend)}</p>
+                                <p className="text-[26px] font-black text-emerald-600">EUR (€) {formatCurrency(totalSend)}</p>
                             </div>
                             <div className="bg-neutral-50/70 p-6 rounded-[16px] border border-neutral-100 transition-all hover:shadow-sm">
                                 <p className="text-[12px] text-neutral-500 font-semibold mb-2">Total Paid</p>
-                                <p className="text-[26px] font-black text-rose-600">Rs. {formatCurrency(totalPaid)}</p>
+                                <p className="text-[26px] font-black text-rose-600">EUR (€){formatCurrency(totalPaid)}</p>
                             </div>
                             <div className="bg-neutral-50/70 p-6 rounded-[16px] border border-neutral-100 transition-all hover:shadow-sm">
                                 <p className="text-[12px] text-neutral-500 font-semibold mb-2">Total Deposit</p>
-                                <p className="text-[26px] font-black text-[#1E293B]">Rs. {formatCurrency(totalDeposit)}</p>
+                                <p className="text-[26px] font-black text-[#1E293B]">EUR (€) {formatCurrency(totalDeposit)}</p>
                             </div>
                         </div>
 
                         {/* CHART SECTION */}
                         <div className="border border-neutral-100 rounded-[16px] p-6 mb-8 relative">
                             <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-6 border-b border-dashed border-neutral-200 pb-2">BALANCE TREND</p>
-                            
+
                             {chartData.length > 0 ? (
                                 <div className="h-[200px] w-full mt-4 flex items-end">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                                             <defs>
                                                 <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
-                                                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                                                    <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#4F46E5" stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
-                                            <XAxis 
-                                                dataKey="dateFormatted" 
-                                                axisLine={{ stroke: '#E5E7EB', strokeDasharray: '4 4' }} 
-                                                tickLine={false} 
+                                            <XAxis
+                                                dataKey="dateFormatted"
+                                                axisLine={{ stroke: '#E5E7EB', strokeDasharray: '4 4' }}
+                                                tickLine={false}
                                                 tick={{ fill: '#9CA3AF', fontSize: 11, fontWeight: 500 }}
                                                 dy={10}
                                             />
-                                            <YAxis 
-                                                tickFormatter={(val) => `Rs${val >= 1000 ? (val/1000).toFixed(1) + 'k' : val}`}
+                                            <YAxis
+                                                tickFormatter={(val) => `EUR${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
                                                 axisLine={false}
                                                 tickLine={false}
                                                 tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 500 }}
                                             />
                                             <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#E5E7EB', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                            <Area 
-                                                type="monotone" 
-                                                dataKey="balance" 
-                                                stroke="#3B82F6" 
-                                                strokeWidth={2.5} 
-                                                fillOpacity={1} 
-                                                fill="url(#colorBalance)" 
+                                            <Area
+                                                type="monotone"
+                                                dataKey="balance"
+                                                stroke="#3B82F6"
+                                                strokeWidth={2.5}
+                                                fillOpacity={1}
+                                                fill="url(#colorBalance)"
                                             />
                                             {/* Horizontal zero line for context */}
-                                            <line x1="0" y1="0" x2="100%" y2="0" style={{ stroke: '#E5E7EB', strokeWidth: 1, strokeDasharray: '4 4' }}/>
+                                            <line x1="0" y1="0" x2="100%" y2="0" style={{ stroke: '#E5E7EB', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                         </AreaChart>
                                     </ResponsiveContainer>
                                 </div>

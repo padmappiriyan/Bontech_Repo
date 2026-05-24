@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
     const dispatch = useDispatch();
     const { loading, error, success } = useSelector((state) => state.transactions);
-    const { globalRates, loadRates } = useSettings();
+    const { loadRates: _unused } = useSettings(); // rates no longer needed — EUR only
 
     const [formData, setFormData] = useState({
         platform: initialPlatform || '',
@@ -20,7 +20,7 @@ const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
         senderName: '',
         receiverName: '',
         amount: '',
-        currency: 'USD',
+        currency: 'EUR',
         exchangeRate: 1.0,
         fees: 0,
         remarks: ''
@@ -28,9 +28,7 @@ const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
 
     const [totalPayout, setTotalPayout] = useState(0);
 
-    useEffect(() => {
-        loadRates();
-    }, [loadRates]);
+    // EUR-only: no rate fetch needed
 
     useEffect(() => {
         const amount = parseFloat(formData.amount) || 0;
@@ -40,14 +38,7 @@ const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
         setTotalPayout(total.toFixed(2));
     }, [formData.amount, formData.exchangeRate, formData.fees]);
 
-    useEffect(() => {
-        if (globalRates.length > 0) {
-            const config = globalRates.find(r => r.sourceCurrency === formData.currency);
-            if (config) {
-                setFormData(prev => ({ ...prev, exchangeRate: config.rate.toString() }));
-            }
-        }
-    }, [formData.currency, globalRates]);
+    // EUR-only: exchange rate is always 1.0 — no LKR conversion needed
 
     // Stable callback handling to prevent timer resets on re-renders
     const onCompleteRef = useRef(onComplete);
@@ -93,10 +84,10 @@ const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
 
     const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
     const currencies = [
-        { code: 'USD', name: 'US Dollar' },
-        { code: 'EUR', name: 'Euro' },
-        { code: 'GBP', name: 'British Pound' },
-        { code: 'ETB', name: 'Ethiopian Birr' },
+        { code: 'EUR', name: 'Euro',           available: true  },
+        { code: 'USD', name: 'US Dollar',      available: false },
+        { code: 'GBP', name: 'British Pound',  available: false },
+        { code: 'ETB', name: 'Ethiopian Birr', available: false },
     ];
 
     return (
@@ -150,16 +141,32 @@ const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
                                             <button
                                                 key={c.code}
                                                 type="button"
+                                                disabled={!c.available}
                                                 onClick={() => {
+                                                    if (!c.available) return;
                                                     setFormData(prev => ({ ...prev, currency: c.code }));
                                                     setIsCurrencyOpen(false);
                                                 }}
-                                                className={`w-full text-left px-4 py-2 text-[10px] font-bold uppercase transition-colors flex items-center justify-between
-                                                    ${formData.currency === c.code ? 'bg-brand-50 text-brand-600' : 'text-neutral-500 hover:bg-neutral-50'}
+                                                className={`w-full text-left px-4 py-2.5 text-[10px] font-bold uppercase transition-colors flex items-center justify-between
+                                                    ${
+                                                        !c.available
+                                                            ? 'opacity-40 cursor-not-allowed'
+                                                            : formData.currency === c.code
+                                                                ? 'bg-brand-50 text-brand-600'
+                                                                : 'text-neutral-500 hover:bg-neutral-50'
+                                                    }
                                                 `}
                                             >
-                                                <span>{c.code} <span className="text-[8px] opacity-40 ml-1">{c.name}</span></span>
-                                                {formData.currency === c.code && <div className="w-1.5 h-1.5 rounded-full bg-brand-500" />}
+                                                <span className="flex items-center gap-2">
+                                                    <span>{c.code}</span>
+                                                    <span className="text-[8px] opacity-40">{c.name}</span>
+                                                    {!c.available && (
+                                                        <span className="text-[7px] font-black tracking-widest bg-neutral-200 text-neutral-400 px-1.5 py-0.5 rounded-full uppercase">
+                                                            NOT AVAILABLE
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                {c.available && formData.currency === c.code && <div className="w-1.5 h-1.5 rounded-full bg-brand-500" />}
                                             </button>
                                         ))}
                                     </motion.div>
@@ -230,7 +237,7 @@ const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
                         </div>
                     </div>
                     <div className="text-right">
-                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-tight">Payout (LKR)</span>
+                        <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-tight">Payout (EUR)</span>
                         <p className="text-lg font-black text-brand-600 tracking-tighter">
                             {Number(totalPayout).toLocaleString()}
                         </p>

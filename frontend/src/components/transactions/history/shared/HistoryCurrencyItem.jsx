@@ -19,7 +19,7 @@ const HistoryCurrencyItem = ({ data, typeFilter }) => {
             </div>
             <div className="text-right">
                 <p className="text-sm font-black text-neutral-900">
-                    <span className="text-neutral-300 text-[10px] mr-2">LKR</span>
+                    <span className="text-neutral-300 text-[10px] mr-2">EUR</span>
                     {displayData.totalLkr.toLocaleString()}
                 </p>
                 <p className="text-[10px] font-bold text-brand-500/60 uppercase">Market Weighted Value</p>

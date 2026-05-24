@@ -47,15 +47,15 @@ const TransactionDetailModal = ({ transaction, onClose }) => {
                     <div className="w-full space-y-5 border-y border-neutral-100 py-8 mb-8 text-left">
                         <DetailRow label="Beneficiary Name" value={transaction.receiverName} isBold />
                         <DetailRow label="Transaction ID" value={transaction.id?.slice(-10).toUpperCase() || "MT-98231024"} isMono />
-                        <DetailRow label="Native Amount" value={`$${transaction.amount?.toLocaleString()}`} />
-                        <DetailRow label="Recipient gets" value={`Rs. ${totalVolume?.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} isBrand />
+                        <DetailRow label="Native Amount" value={`€${transaction.amount?.toLocaleString()}`} />
+                        <DetailRow label="Total Payout (EUR)" value={`€ ${totalVolume?.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} isBrand />
                         <DetailRow label="Date & Time" value={format(new Date(transaction.createdAt), 'MMM dd, yyyy | hh:mm a')} />
                     </div>
 
                     <div className="w-full space-y-5 px-1 text-left">
                         <DetailRow label="Sent From" value={transaction.senderName || "HQ Master Vault"} />
                         <DetailRow label="Platform Infrastructure" value={transaction.platform?.toUpperCase()} isTag />
-                        <DetailRow label="Processing Fees" value={`Rs. ${transaction.fees?.toLocaleString()}`} />
+                        <DetailRow label="Processing Fees" value={`€ ${transaction.fees?.toLocaleString()}`} />
 
                     </div>
                 </div>

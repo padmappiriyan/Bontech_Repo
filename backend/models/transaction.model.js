@@ -135,6 +135,9 @@ transactionSchema.index({ senderName: 'text', receiverName: 'text' });
 
 // PRE-SAVE MIDDLEWARE
 transactionSchema.pre('save', function () {
+    // EUR-only guard: no conversion needed — amount stays in EUR
+    if (this.currency === 'EUR') this.exchangeRate = 1.0;
+
     // 1. Automatic Total Payout Calculation: (Amount * Rate) + Fees
     this.totalPayout = Number(((this.amount * (this.exchangeRate || 1)) + (this.fees || 0)).toFixed(2));
 
