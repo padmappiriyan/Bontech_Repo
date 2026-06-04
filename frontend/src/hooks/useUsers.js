@@ -12,6 +12,7 @@ const useUsers = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     /**
      * Fetch users with optional params
@@ -38,11 +39,23 @@ const useUsers = () => {
         setIsLoading(true);
         setError(null);
         setSuccess(false);
+        setSuccessMessage('');
 
         try {
-            const newUser = await createUser(userData);
+            const response = await createUser(userData);
+            const newUser = response.user ?? response;
+            const emailSent = response.emailSent;
+            const emailError = response.emailError;
+
             setSuccess(true);
-            setUsers((prev) => [newUser, ...prev]); // Optimistic update
+            setSuccessMessage(
+                emailSent === true
+                    ? `Account created. Login credentials were sent to ${userData.email}.`
+                    : emailSent === false
+                        ? `Account created, but the credentials email could not be sent.${emailError ? ` (${emailError})` : ''} Please share login details manually.`
+                        : 'Account created successfully!'
+            );
+            setUsers((prev) => [newUser, ...prev]);
             return newUser;
         } catch (err) {
             setError(err.message || 'Failed to create user. Please check inputs.');
@@ -81,11 +94,13 @@ const useUsers = () => {
         pagination,
         isLoading, 
         error, 
-        success, 
+        success,
+        successMessage,
         fetchUsers, 
         handleCreateUser,
         handleToggleStatus,
-        setSuccess 
+        setSuccess,
+        setSuccessMessage,
     };
 };
 
