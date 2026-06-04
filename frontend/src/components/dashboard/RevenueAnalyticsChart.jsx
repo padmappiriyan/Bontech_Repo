@@ -90,7 +90,7 @@ const RevenueAnalyticsChart = ({ data, onRangeChange, currentRange }) => {
                                 dy={10}
                             />
                             <YAxis 
-                                tickFormatter={(val) => val === 0 ? 'LKR 0k' : `LKR ${val / 1000}k`} 
+                                tickFormatter={(val) => val === 0 ? '€0k' : `€${val / 1000}k`} 
                                 tickLine={false} 
                                 axisLine={false} 
                                 tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 700 }}

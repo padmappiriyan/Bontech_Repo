@@ -26,11 +26,11 @@ const DeleteUserModal = ({ isOpen, onClose, user, onConfirm }) => {
                     </div>
 
                     <div className="relative">
-                        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6">
+                        <div className="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6">
                             <FiAlertCircle size={32} />
                         </div>
 
-                        <h3 className="text-2xl font-bold text-neutral-900 tracking-tight mb-2 italic">
+                        <h3 className="text-2xl font-bold text-neutral-900 tracking-tight mb-2 ">
                             confirm <span className="text-red-600">deletion</span>
                         </h3>
                         <p className="text-neutral-500 text-[15px] font-medium leading-relaxed mb-8 lowercase">
@@ -41,13 +41,13 @@ const DeleteUserModal = ({ isOpen, onClose, user, onConfirm }) => {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={onClose}
-                                className="flex-1 h-14 rounded-2xl text-neutral-400 font-bold hover:bg-neutral-50 transition-colors lowercase"
+                                className="flex-1 h-14 rounded-2xl text-neutral-400 font-bold hover:bg-neutral-50 transition-colors lowercase cursor-pointer"
                             >
                                 keep account
                             </button>
                             <button
                                 onClick={onConfirm}
-                                className="flex-1 h-14 rounded-2xl bg-red-600 text-white font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95 lowercase"
+                                className="flex-1 h-14 rounded-2xl bg-red-600 text-white font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-95 lowercase cursor-pointer"
                             >
                                 delete forever
                             </button>

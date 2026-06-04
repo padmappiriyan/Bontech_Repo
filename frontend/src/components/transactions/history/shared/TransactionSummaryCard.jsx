@@ -68,7 +68,7 @@ const TransactionSummaryCard = React.memo(({ stats, loading }) => {
                         <h2 className="text-xl font-black text-neutral-900 tracking-tighter tabular-nums leading-none">
                             {mainAmount.toLocaleString()}
                         </h2>
-                        <span className="text-2xl font-black text-brand-600 leading-none">LKR</span>
+                        <span className="text-2xl font-black text-brand-600 leading-none">EUR (€)</span>
                     </div>
                 </motion.div>
                 <div className="flex items-center justify-center gap-2 mt-2">
@@ -127,7 +127,7 @@ const TransactionSummaryCard = React.memo(({ stats, loading }) => {
                                     {item.totalOriginal.toLocaleString()} {item.symbol}
                                 </p>
                                 <p className="text-[10px] font-bold text-neutral-400 tabular-nums leading-none tracking-tight">
-                                    ≈ Rs. {item.totalLkr.toLocaleString()}
+                                    ≈ EUR (€) {item.totalLkr.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </p>
                             </div>
                         </motion.div>

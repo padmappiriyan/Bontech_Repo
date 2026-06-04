@@ -5,6 +5,11 @@ import toast from 'react-hot-toast';
 import {
     AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
+import {
+    formatCurrencyAmount,
+    formatCurrencyWithLabel,
+    formatChartAxisTick,
+} from '../../../utils/currency';
 
 const UserLedgerExplorer = ({ userId }) => {
     const [rangeType, setRangeType] = useState('Last 7 Days');
@@ -103,11 +108,6 @@ const UserLedgerExplorer = ({ userId }) => {
         return isoString;
     };
 
-    const formatCurrency = (val) => {
-        if (!val) return '0.00';
-        return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, ' ');
-    };
-
     const chartData = useMemo(() => {
         return [...activeData].reverse().map(row => ({
             dateFormatted: formatDateShort(row.date),
@@ -120,7 +120,7 @@ const UserLedgerExplorer = ({ userId }) => {
             return (
                 <div className="bg-white border border-neutral-100 p-3 rounded-lg shadow-lg">
                     <p className="text-[#1E293B] font-bold text-sm mb-1">{label}</p>
-                    <p className="text-brand-600 font-bold text-[13px]">Rs. {formatCurrency(payload[0].value)}</p>
+                    <p className="text-brand-600 font-bold text-[13px]">{formatCurrencyWithLabel(payload[0].value)}</p>
                 </div>
             );
         }
@@ -207,19 +207,19 @@ const UserLedgerExplorer = ({ userId }) => {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                             <div className="bg-neutral-50/50 p-6 rounded-[24px] border border-neutral-100 transition-all">
                                 <p className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider mb-2">Total Send</p>
-                                <p className="text-2xl font-black text-slate-900">Rs. {formatCurrency(totalSend)}</p>
+                                <p className="text-2xl font-black text-slate-900">{formatCurrencyWithLabel(totalSend)}</p>
                             </div>
                             <div className="bg-neutral-50/50 p-6 rounded-[24px] border border-neutral-100 transition-all">
                                 <p className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider mb-2">Total Paid</p>
-                                <p className="text-2xl font-black text-slate-900">Rs. {formatCurrency(totalPaid)}</p>
+                                <p className="text-2xl font-black text-slate-900">{formatCurrencyWithLabel(totalPaid)}</p>
                             </div>
                             <div className="bg-neutral-50/50 p-6 rounded-[24px] border border-neutral-100 transition-all">
                                 <p className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider mb-2">Total Deposit</p>
-                                <p className="text-2xl font-black text-slate-900">Rs. {formatCurrency(totalDeposit)}</p>
+                                <p className="text-2xl font-black text-slate-900">{formatCurrencyWithLabel(totalDeposit)}</p>
                             </div>
                             <div className="bg-neutral-50/50 p-6 rounded-[24px] border border-neutral-100 transition-all">
                                 <p className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider mb-2">Total Balance</p>
-                                <p className="text-2xl font-black text-slate-900">Rs. {formatCurrency(endingBalance)}</p>
+                                <p className="text-2xl font-black text-slate-900">{formatCurrencyWithLabel(endingBalance)}</p>
                             </div>
                         </div>
 
@@ -244,7 +244,7 @@ const UserLedgerExplorer = ({ userId }) => {
                                                 dy={10}
                                             />
                                             <YAxis
-                                                tickFormatter={(val) => `Rs${val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val}`}
+                                                tickFormatter={formatChartAxisTick}
                                                 axisLine={false}
                                                 tickLine={false}
                                                 tick={{ fill: '#cbd5e1', fontSize: 10, fontWeight: 700 }}
@@ -292,18 +292,18 @@ const UserLedgerExplorer = ({ userId }) => {
                                         {activeData.map((row, idx) => (
                                             <tr key={idx} className="hover:bg-neutral-50/30 transition-colors group">
                                                 <td className="py-4 pl-8 pr-3 text-[13px] font-bold text-slate-600">{formatDateShort(row.date)}</td>
-                                                <td className="py-4 px-3 text-[13px] font-medium text-slate-500">{formatCurrency(row.bf)}</td>
+                                                <td className="py-4 px-3 text-[13px] font-medium text-slate-500">{formatCurrencyAmount(row.bf)}</td>
                                                 <td className="py-4 px-3 text-[13px] font-bold text-rose-500">
-                                                    {row.send > 0 ? `+${formatCurrency(row.send)}` : '0'}
+                                                    {row.send > 0 ? `+${formatCurrencyAmount(row.send)}` : '0'}
                                                 </td>
                                                 <td className="py-4 px-3 text-[13px] font-bold text-blue-500">
-                                                    {row.paid > 0 ? `-${formatCurrency(row.paid)}` : '0'}
+                                                    {row.paid > 0 ? `-${formatCurrencyAmount(row.paid)}` : '0'}
                                                 </td>
                                                 <td className="py-4 px-3 text-[13px] font-bold text-emerald-600">
-                                                    {row.deposit > 0 ? `-${formatCurrency(row.deposit)}` : '0'}
+                                                    {row.deposit > 0 ? `-${formatCurrencyAmount(row.deposit)}` : '0'}
                                                 </td>
                                                 <td className={`py-4 pr-8 pl-3 text-[14px] font-black text-right ${row.balance < 0 ? 'text-rose-600' : 'text-slate-900'}`}>
-                                                    {formatCurrency(row.balance)}
+                                                    {formatCurrencyAmount(row.balance)}
                                                 </td>
                                             </tr>
                                         ))}

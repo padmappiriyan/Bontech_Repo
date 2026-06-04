@@ -88,13 +88,13 @@ const UserDetailModal = ({ user, isOpen, onClose }) => {
                                 {/* Brought Forward */}
                                 <div className="p-5 rounded-2xl bg-neutral-50/50 border border-neutral-100 transition-all hover:bg-neutral-50">
                                     <span className="text-[11px] font-medium text-neutral-400 uppercase  block mb-1">Brought Forward</span>
-                                    <span className="text-[14px] font-medium text-slate-700">{formatCurrency(user.broughtFwd)} <span className="text-sm font-medium text-neutral-400 ml-1">LKR</span></span>
+                                    <span className="text-[14px] font-medium text-slate-700">{formatCurrency(user.broughtFwd)} <span className="text-sm font-medium text-neutral-400 ml-1">EUR (€)</span></span>
                                 </div>
 
                                 {/* Net Balance */}
                                 <div className="p-5 rounded-2xl bg-brand-50/30 border border-brand-100/50 transition-all hover:bg-brand-50/50">
                                     <span className="text-[11px] font-medium text-brand-500 uppercase  block mb-1">Net Balance</span>
-                                    <span className="text-[14px] font-medium text-brand-600">{formatCurrency(user.netBalance)} <span className="text-sm font-medium text-brand-400 ml-1">LKR</span></span>
+                                    <span className="text-[14px] font-medium text-brand-600">{formatCurrency(user.netBalance)} <span className="text-sm font-medium text-brand-400 ml-1">EUR (€)</span></span>
                                 </div>
                             </div>
 

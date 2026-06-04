@@ -59,7 +59,7 @@ const RateList = ({ rates = [], onEdit }) => {
 
                                     <div className="text-right">
                                         <div className="text-[16px] font-black text-slate-800">
-                                            Rs. {r.rate.toFixed(2)}
+                                            EUR (€) {r.rate.toFixed(2)}
                                         </div>
                                         <div className={`flex items-center justify-end gap-1 text-[11px] font-bold ${trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
                                             {trend === 'up' ? <FiTrendingUp size={12} /> : <FiTrendingDown size={12} />}

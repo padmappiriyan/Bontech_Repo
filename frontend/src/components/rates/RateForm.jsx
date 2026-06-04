@@ -87,7 +87,7 @@ const RateForm = ({
                                 value={formData.rate}
                                 onChange={onChange}
                             />
-                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black text-neutral-300 tracking-widest leading-none">LKR</div>
+                            <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[9px] font-black text-neutral-300 tracking-widest leading-none">EUR (€)</div>
                         </div>
                     </div>
                 </div>

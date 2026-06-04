@@ -151,7 +151,7 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
                         <div className={`w-2 h-2 rounded-full ${selectedPlatformData.currentBalanceLkr < 10000 ? 'bg-rose-500 animate-pulse' : 'bg-brand-500'}`} />
                         <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
                             Your Personal {selectedPlatformData.name} Vault: 
-                            <span className="text-neutral-900 ml-2">{selectedPlatformData.currentBalanceLkr?.toLocaleString()} LKR</span>
+                            <span className="text-neutral-900 ml-2">EUR (€) {selectedPlatformData.currentBalanceLkr?.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </span>
                     </motion.div>
                 )}

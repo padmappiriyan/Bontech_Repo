@@ -62,11 +62,11 @@ const CustomSelect = ({ value, onChange, options }) => {
 const QuickConverter = ({ rates = [] }) => {
     const [amount, setAmount] = useState(100);
     const [fromCurrency, setFromCurrency] = useState('USD');
-    const [toCurrency, setToCurrency] = useState('LKR');
+    const [toCurrency, setToCurrency] = useState('EUR');
     const [convertedAmount, setConvertedAmount] = useState(0);
 
     const currencyOptions = [
-        { value: 'LKR', label: 'LKR - Sri Lankan Rupee' },
+        { value: 'EUR', label: 'EUR - Euro' },
         ...rates.map(r => ({
             value: r.sourceCurrency,
             label: `${r.sourceCurrency} - ${r.sourceCurrencyName || r.sourceCurrency}`
@@ -74,16 +74,16 @@ const QuickConverter = ({ rates = [] }) => {
     ];
 
     useEffect(() => {
-        const fromRate = fromCurrency === 'LKR' ? 1 : rates.find(r => r.sourceCurrency === fromCurrency)?.rate || 1;
-        const toRate = toCurrency === 'LKR' ? 1 : rates.find(r => r.sourceCurrency === toCurrency)?.rate || 1;
+        const fromRate = fromCurrency === 'EUR' ? 1 : rates.find(r => r.sourceCurrency === fromCurrency)?.rate || 1;
+        const toRate = toCurrency === 'EUR' ? 1 : rates.find(r => r.sourceCurrency === toCurrency)?.rate || 1;
 
         let lkrValue = amount;
-        if (fromCurrency !== 'LKR') {
+        if (fromCurrency !== 'EUR') {
             lkrValue = amount * fromRate;
         }
 
         let finalValue = lkrValue;
-        if (toCurrency !== 'LKR') {
+        if (toCurrency !== 'EUR') {
             finalValue = lkrValue / toRate;
         }
 
@@ -146,9 +146,9 @@ const QuickConverter = ({ rates = [] }) => {
                     <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Converted Amount</span>
                     <div className="flex flex-col">
                         <span className="text-[22px] font-black text-brand-600 tracking-tight leading-none">
-                            {toCurrency === 'LKR' ? 'Rs. ' : ''}
+                            {toCurrency === 'EUR' ? 'EUR (€) ' : ''}
                             {convertedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            {toCurrency !== 'LKR' ? ` ${toCurrency}` : ''}
+                            {toCurrency !== 'EUR' ? ` ${toCurrency}` : ''}
                         </span>
                         <span className="text-[10px] font-bold text-slate-400 mt-1">
                             1 {fromCurrency} = {(convertedAmount / amount).toFixed(4)} {toCurrency}

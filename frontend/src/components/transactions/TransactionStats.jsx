@@ -69,7 +69,7 @@ const TransactionStats = ({ stats }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <StatCard
                 title="Total Payout Volume"
-                value={`Rs. ${stats.totalVolume?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}`}
+                value={`EUR (€) ${stats.totalVolume?.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0,00'}`}
                 icon={MdOutlineAccountBalance}
                 color="bg-brand-700"
                 textWhite

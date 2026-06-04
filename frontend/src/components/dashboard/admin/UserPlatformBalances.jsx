@@ -85,7 +85,7 @@ const UserPlatformBalances = ({ platformData, loading }) => {
                                     <div className="text-[15px] font-medium text-indigo-700 tracking-tighter leading-none">
                                         {formatCurrency(plat.currentBalance)}
                                     </div>
-                                    <div className="text-[11px] font-medium text-slate-400 uppercase mt-1.5 opacity-60">LKR Balance</div>
+                                    <div className="text-[11px] font-medium text-slate-400 uppercase mt-1.5 opacity-60">EUR (€) Balance</div>
                                 </div>
                             </div>
                         </div>

@@ -26,7 +26,7 @@ const OpeningBalanceModal = ({ isOpen, suggestedAmount, onOpenSuccess }) => {
         setLoading(true);
         setError(null);
         try {
-            const data = await openLedger({ openingBalance: parseFloat(amount), currency: 'LKR' });
+            const data = await openLedger({ openingBalance: parseFloat(amount), currency: 'EUR' });
             onOpenSuccess(data);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to open ledger');
@@ -63,7 +63,7 @@ const OpeningBalanceModal = ({ isOpen, suggestedAmount, onOpenSuccess }) => {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <Input
                                 type="number"
-                                label="Opening Balance (LKR)"
+                                label="Opening Balance (EUR €)"
                                 placeholder="0.00"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}

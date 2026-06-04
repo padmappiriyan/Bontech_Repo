@@ -64,7 +64,7 @@ const PlatformHistoryCard = ({ platformData, index }) => {
                 <div className="bg-neutral-50/80 px-4 py-2.5 rounded-[1.25rem] border border-neutral-100/80 text-right min-w-[120px]">
                     <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-0.5">Latest Balance</p>
                     <p className="text-[18px] leading-none font-black text-[#1E293B] tracking-tight">
-                        <span className="text-[11px] font-bold mr-1 opacity-50">LKR</span>
+                        <span className="text-[11px] font-bold mr-1 opacity-50">EUR (€)</span>
                         {latestBalance.toLocaleString()}
                     </p>
                 </div>
