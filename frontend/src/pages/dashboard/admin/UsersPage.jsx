@@ -6,6 +6,9 @@ import { getUserStats } from '../../../api/userApi';
 import StatCircles from '../../../components/dashboard/StatCircles';
 import UserRoleBarChart from '../../../components/dashboard/UserRoleBarChart';
 
+//toast message
+import toast from 'react-hot-toast';
+
 // Specialized Hook
 import useUsers from '../../../hooks/useUsers';
 
@@ -71,18 +74,21 @@ const UsersPage = () => {
             await handleToggleStatus(userId, newStatus);
             fetchStats();
         } catch (err) {
+            toast.error('Failed to update user status');
             // Error managed by hook context
         }
     };
 
     const handleDeleteConfirm = async () => {
         try {
+            const deletedUserName = confirmDelete.user?.name || 'User';
             // Consolidated to use handleToggleStatus with 'deleted' status
             await handleToggleStatus(confirmDelete.user.id || confirmDelete.user._id, 'deleted');
             setConfirmDelete({ isOpen: false, user: null });
+            toast.success(`User ${deletedUserName} deleted successfully`);
             fetchStats();
         } catch (err) {
-            setLocalError(err.message);
+            toast.error('Failed to delete user');
             setConfirmDelete({ isOpen: false, user: null });
         }
     };
