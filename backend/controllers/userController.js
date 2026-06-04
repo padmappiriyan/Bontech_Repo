@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import { User, USER_ROLES } from '../models/user.model.js';
 import { Activity, ACTIVITY_TYPES } from '../models/activity.model.js';
 import { userEventBus, USER_EVENTS } from '../events/userEvents.js';
+import { sendWelcomeCredentialsEmail } from '../services/emailService.js';
 import ExcelJS from 'exceljs';
 import path from 'path';
 import fs from 'fs';
@@ -39,7 +40,11 @@ const upload = multer({
  * @access  Private/Admin
  */
 const createUser = asyncHandler(async (req, res) => {
+    
     const { name, email, password, role } = req.body;
+    
+
+    
 
     // 1. Basic validation
     if (!name || !email || !password || !role) {
@@ -67,14 +72,39 @@ const createUser = asyncHandler(async (req, res) => {
         password, // Pre-save hook will hash this automatically
         role
     });
-
+    
     if (newUser) {
+        const emailResult = await sendWelcomeCredentialsEmail({
+            name: newUser.name,
+            email: newUser.email,
+            password,
+            role: newUser.role,
+        });
+
+        if (emailResult.sent) {
+            console.log('[User] Credentials email sent for new user:', {
+                userId: newUser._id,
+                email: newUser.email,
+                messageId: emailResult.messageId,
+            });
+        } else {
+            console.warn('[User] New user created but credentials email was not sent:', {
+                userId: newUser._id,
+                email: newUser.email,
+                reason: emailResult.error,
+            });
+        }
+
         // Log Activity (Action by Admin)
         await Activity.logAction({
             user: req.user._id, // The Admin who created the user
             actionType: ACTIVITY_TYPES.USER_CREATE,
             description: `Admin ${req.user.email} created new user: ${newUser.email} with role: ${newUser.role}`,
-            details: { targetUserId: newUser._id, targetRole: newUser.role },
+            details: {
+                targetUserId: newUser._id,
+                targetRole: newUser.role,
+                credentialsEmailSent: emailResult.sent,
+            },
             ipAddress: req.ip,
             userAgent: req.get('User-Agent'),
             category: 'user_management'
@@ -82,7 +112,9 @@ const createUser = asyncHandler(async (req, res) => {
 
         res.status(201).json({
             success: true,
-            user: newUser.getSafeData()
+            user: newUser.getSafeData(),
+            emailSent: emailResult.sent,
+            ...(emailResult.sent ? {} : { emailError: emailResult.error }),
         });
     } else {
         res.status(400);

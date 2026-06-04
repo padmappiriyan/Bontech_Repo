@@ -5,7 +5,7 @@ import Button from '../common/Button';
 import useUsers from '../../hooks/useUsers';
 
 const UserCreationForm = ({ onSuccess }) => {
-  const { handleCreateUser, isLoading, error, success: localSuccess, setSuccess } = useUsers();
+  const { handleCreateUser, isLoading, error, success: localSuccess, successMessage, setSuccess, setSuccessMessage } = useUsers();
 
   const [formData, setFormData] = useState({ 
     name: '', 
@@ -24,7 +24,7 @@ const UserCreationForm = ({ onSuccess }) => {
     try {
         await handleCreateUser(formData);
         if (onSuccess) onSuccess();
-        setFormData({ name: '', email: '', password: '', role: 'user' }); // Clear on success
+        setFormData({ name: '', email: '', password: '', role: 'user' });
     } catch (err) {
         // Error handled in hook
     }
@@ -45,7 +45,7 @@ const UserCreationForm = ({ onSuccess }) => {
           </div>
           <div>
             <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Create User</h2>
-            <p className="text-neutral-400 text-sm font-medium">Add a new account to the system</p>
+            <p className="text-neutral-400 text-sm font-medium">Add a new user or supervisor to the system</p>
           </div>
         </div>
 
@@ -60,7 +60,7 @@ const UserCreationForm = ({ onSuccess }) => {
         {localSuccess && (
           <div className="mb-6 bg-emerald-50 text-emerald-600 p-4 rounded-xl border border-emerald-100 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <FiCheck size={18} className="flex-shrink-0" />
-            <p className="text-sm font-bold tracking-tight">Account created successfully!</p>
+            <p className="text-sm font-bold tracking-tight">{successMessage || 'Account created successfully!'}</p>
           </div>
         )}
 
@@ -69,7 +69,7 @@ const UserCreationForm = ({ onSuccess }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               id="name"
-              label="Full Name"
+              label={<>Full Name <span className="text-rose-500 text-[12px]">*</span></>}
               placeholder="e.g. John Doe"
               icon={FiUser} 
               value={formData.name}
@@ -79,7 +79,7 @@ const UserCreationForm = ({ onSuccess }) => {
             <Input
               id="email"
               type="email"
-              label="Email Address"
+              label={<>Email Address <span className="text-rose-500 text-[12px]">*</span></>}
               placeholder="e.g. john@example.com"
               icon={FiMail}
               value={formData.email}
@@ -92,7 +92,7 @@ const UserCreationForm = ({ onSuccess }) => {
             <Input
               id="password"
               type="password"
-              label="Temporary Password"
+              label={<>Temporary Password <span className="text-rose-500 text-[12px]">*</span></>}
               placeholder="••••••••"
               icon={FiLock}
               value={formData.password}
@@ -102,7 +102,9 @@ const UserCreationForm = ({ onSuccess }) => {
             
             {/* ── Custom Role Selection UI ── */}
             <div className="flex flex-col gap-2">
-              <label className="text-[13px] font-bold text-neutral-500 uppercase tracking-widest px-1">Access Role</label>
+              <label className="text-[13px] font-bold  px-1">
+                Access Role <span className="text-rose-500 text-[12px]">*</span>
+              </label>
               <div className="grid grid-cols-2 gap-3 h-12">
                 {['user', 'supervisor'].map((role) => (
                   <button
@@ -128,7 +130,7 @@ const UserCreationForm = ({ onSuccess }) => {
           <div className="mt-4 pt-6 border-t border-neutral-50 flex justify-end items-center gap-4">
             <button 
               type="button" 
-              onClick={() => { setFormData({ name: '', email: '', password: '', role: 'user' }); setSuccess(false); }}
+              onClick={() => { setFormData({ name: '', email: '', password: '', role: 'user' }); setSuccess(false); setSuccessMessage(''); }}
               className="text-neutral-400 text-sm font-bold hover:text-neutral-900 transition-colors"
             >
               Reset Fields

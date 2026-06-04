@@ -19,6 +19,7 @@ import ReportsPage from "./pages/dashboard/common/ReportsPage";
 import AdminChangeRequestReviewPage from './pages/dashboard/admin/AdminChangeRequestReviewPage';
 import AdminReportsPage from './pages/dashboard/admin/AdminReportsPage';
 import UserRecordsPage from './pages/dashboard/admin/UserRecordsPage';
+import ExcelPage from './pages/dashboard/common/ExcelPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import LandingLayout from './components/layout/LandingLayout';
 
@@ -53,6 +54,7 @@ function App() {
             <Route path="/dashboard/audit-logs" element={<AuditLogsPage />} />
             <Route path="/dashboard/activity-timeline" element={<ActivityPage />} />
             <Route path="/dashboard/rates" element={<RatesPage />} />
+            <Route path="/dashboard/excel" element={<ExcelPage />} />
 
             {/* Consolidated Reports Route — Logic inside component handles role branching */}
             <Route path="/dashboard/reports" element={

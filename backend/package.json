@@ -7,6 +7,7 @@
     "start": "node --env-file=.env server.js",
     "backend": "nodemon --env-file=.env server.js",
     "seed:admin": "node --env-file=.env scripts/seedAdmin.js",
+    "test:email": "node --env-file=.env scripts/testEmail.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -28,6 +29,7 @@
     "mongoose": "^9.3.1",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.10",
     "nodemon": "^3.1.14",
     "pdfkit": "^0.18.0",
     "swagger-jsdoc": "^6.2.8",

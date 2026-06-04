@@ -24,7 +24,7 @@ export const getAllUsers = async (params = {}) => {
  */
 export const createUser = async (userData) => {
   const { data } = await axiosInstance.post(USER_ENDPOINTS.BASE, userData);
-  return data.user;
+  return data;
 };
 
 /**

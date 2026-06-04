@@ -58,7 +58,7 @@ const AdminOverviewMetrics = ({ data = {}, totalUsers = 0 }) => {
         value: data.platformNet ?? 0,
         subtext: 'Stable liquidity',
         icon: Building2,
-        currency: 'LKR',
+        currency: 'EUR (€)',
         trend: 'up'
     };
 

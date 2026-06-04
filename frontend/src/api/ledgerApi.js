@@ -13,7 +13,7 @@ const LEDGER_ENDPOINTS = Object.freeze({
  * Fetch current ledger status
  * Renamed to getLedgerStatus to match existing component imports
  */
-export const getLedgerStatus = async (currency = 'LKR') => {
+export const getLedgerStatus = async (currency = 'EUR') => {
     const { data } = await axiosInstance.get(LEDGER_ENDPOINTS.STATUS, { params: { currency } });
     return data;
 };

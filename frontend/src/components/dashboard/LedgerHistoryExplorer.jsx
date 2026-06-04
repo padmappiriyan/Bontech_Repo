@@ -6,6 +6,11 @@ import toast from 'react-hot-toast';
 import {
     AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
+import {
+    formatCurrencyAmount,
+    formatCurrencyWithLabel,
+    formatChartAxisTick,
+} from '../../utils/currency';
 
 const LedgerHistoryExplorer = () => {
     const [rangeType, setRangeType] = useState('Last 7 Days'); // 'Last 7 Days', '30 Days', 'All Time', 'Custom'
@@ -112,12 +117,6 @@ const LedgerHistoryExplorer = () => {
         return isoString;
     };
 
-    const formatCurrency = (val) => {
-        if (!val) return '0.00';
-        // Match the specific string layout requested (e.g., 211 175,00)
-        return val.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\u202f/g, ' ');
-    };
-
     // Chart Data Preparation - Chart needs to go forward chronologically left to right
     const chartData = useMemo(() => {
         return [...activeData].reverse().map(row => ({
@@ -131,7 +130,7 @@ const LedgerHistoryExplorer = () => {
             return (
                 <div className="bg-white border border-neutral-100 p-3 rounded-lg shadow-lg">
                     <p className="text-[#1E293B] font-bold text-sm mb-1">{label}</p>
-                    <p className="text-brand-600 font-bold text-[13px]">EUR (€). {formatCurrency(payload[0].value)}</p>
+                    <p className="text-brand-600 font-bold text-[13px]">{formatCurrencyWithLabel(payload[0].value)}</p>
                 </div>
             );
         }
@@ -223,15 +222,15 @@ const LedgerHistoryExplorer = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             <div className="bg-neutral-50/70 p-6 rounded-[16px] border border-neutral-100 transition-all hover:shadow-sm">
                                 <p className="text-[12px] text-neutral-500 font-semibold mb-2">Total Send</p>
-                                <p className="text-[26px] font-black text-emerald-600">EUR (€) {formatCurrency(totalSend)}</p>
+                                <p className="text-[26px] font-black text-emerald-600">{formatCurrencyWithLabel(totalSend)}</p>
                             </div>
                             <div className="bg-neutral-50/70 p-6 rounded-[16px] border border-neutral-100 transition-all hover:shadow-sm">
                                 <p className="text-[12px] text-neutral-500 font-semibold mb-2">Total Paid</p>
-                                <p className="text-[26px] font-black text-rose-600">EUR (€){formatCurrency(totalPaid)}</p>
+                                <p className="text-[26px] font-black text-rose-600">{formatCurrencyWithLabel(totalPaid)}</p>
                             </div>
                             <div className="bg-neutral-50/70 p-6 rounded-[16px] border border-neutral-100 transition-all hover:shadow-sm">
                                 <p className="text-[12px] text-neutral-500 font-semibold mb-2">Total Deposit</p>
-                                <p className="text-[26px] font-black text-[#1E293B]">EUR (€) {formatCurrency(totalDeposit)}</p>
+                                <p className="text-[26px] font-black text-[#1E293B]">{formatCurrencyWithLabel(totalDeposit)}</p>
                             </div>
                         </div>
 
@@ -257,7 +256,7 @@ const LedgerHistoryExplorer = () => {
                                                 dy={10}
                                             />
                                             <YAxis
-                                                tickFormatter={(val) => `EUR${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
+                                                tickFormatter={formatChartAxisTick}
                                                 axisLine={false}
                                                 tickLine={false}
                                                 tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 500 }}
@@ -306,12 +305,12 @@ const LedgerHistoryExplorer = () => {
                                         {activeData.map((row, idx) => (
                                             <tr key={idx} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50/30 transition-colors">
                                                 <td className="py-3 pl-6 pr-3 text-[13px] font-semibold text-neutral-600">{formatDateShort(row.date)}</td>
-                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{formatCurrency(row.bf)}</td>
-                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{formatCurrency(row.send)}</td>
-                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{formatCurrency(row.paid)}</td>
-                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{row.deposit === 0 ? '-' : formatCurrency(row.deposit)}</td>
+                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{formatCurrencyAmount(row.bf)}</td>
+                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{formatCurrencyAmount(row.send)}</td>
+                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{formatCurrencyAmount(row.paid)}</td>
+                                                <td className="py-3 px-3 text-[13px] font-medium text-neutral-600">{row.deposit === 0 ? '-' : formatCurrencyAmount(row.deposit)}</td>
                                                 <td className={`py-3 pr-6 pl-3 text-[13px] font-bold text-right ${row.balance < 0 ? 'text-rose-500' : 'text-[#1E293B]'}`}>
-                                                    {formatCurrency(row.balance)}
+                                                    {formatCurrencyAmount(row.balance)}
                                                 </td>
                                             </tr>
                                         ))}

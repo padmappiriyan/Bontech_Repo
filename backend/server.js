@@ -1,10 +1,11 @@
+import './config/loadEnv.js';
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
-import dotenv from 'dotenv';
 
 import { fileURLToPath } from 'url';
 
@@ -37,8 +38,9 @@ import { startUserWorker } from './workers/userWorker.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { isEmailConfigured, verifyEmailConnection } from './services/emailService.js';
+
 const app = express();
-dotenv.config();
 
 // 1. Connect Database (Initial check + Serverless Middleware)
 connectDB().catch(err => console.error("Initial MongoDB connection failed:", err.message));
@@ -119,8 +121,17 @@ app.use(errorHandler);
 
 //. Server Listen
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
     console.log(`Server started in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    console.log('[Email] SMTP configured:', isEmailConfigured());
+    if (isEmailConfigured()) {
+        const check = await verifyEmailConnection();
+        if (!check.ok) {
+            console.warn('[Email] Startup SMTP check failed:', check.reason);
+        }
+    } else {
+        console.warn('[Email] Set SMTP_USER and SMTP_PASS in .env to send welcome emails.');
+    }
 });
 
 //8. Handle Unhandled Promise Rejections (e.g. database errors)

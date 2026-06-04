@@ -162,7 +162,7 @@ const DailyDrawerReconciliation = ({ isFinalized, isNotStarted }) => {
                                     <label className="text-[13px] font-medium text-slate-600 ml-1">Cash (In Hand)</label>
                                     <div className="relative group">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[10px] font-black text-slate-400 group-focus-within:text-brand-500 transition-colors">
-                                            LKR
+                                            EUR (€)
                                         </div>
                                         <input
                                             type="number"
@@ -259,7 +259,7 @@ const DailyDrawerReconciliation = ({ isFinalized, isNotStarted }) => {
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-center">
                                         <span className="text-[13px] font-medium text-slate-500">Total Amount (Transactions)</span>
-                                        <span className="text-[13px] font-medium text-slate-800 tracking-tight">LKR {formatCurrency(totalAmount)}</span>
+                                        <span className="text-[13px] font-medium text-slate-800 tracking-tight">EUR (€) {formatCurrency(totalAmount)}</span>
                                     </div>
 
                                     <div className="flex justify-between items-center border-t border-dashed border-slate-200 pt-6">
@@ -268,7 +268,7 @@ const DailyDrawerReconciliation = ({ isFinalized, isNotStarted }) => {
                                             <span className="text-[13px] text-slate-400 font-medium">(Cash + Deposit - Credit)</span>
                                         </div>
                                         <span className={`text-[13px] font-medium text-slate-800 tracking-tight ${isReconciled ? 'text-emerald-600' : 'text-rose-600 animate-pulse'}`}>
-                                            LKR {formatCurrency(calculatedBalance)}
+                                            EUR (€) {formatCurrency(calculatedBalance)}
                                         </span>
                                     </div>
 
@@ -286,7 +286,7 @@ const DailyDrawerReconciliation = ({ isFinalized, isNotStarted }) => {
                                                 <FiAlertCircle size={24} />
                                                 <div>
                                                     <p className="font-black uppercase tracking-wider text-[11px]">Difference Detected</p>
-                                                    <p className="text-rose-100 text-[10px] font-bold">Difference: LKR {formatCurrency(Math.abs(calculatedBalance - totalAmount))}</p>
+                                                    <p className="text-rose-100 text-[10px] font-bold">Difference: EUR (€) {formatCurrency(Math.abs(calculatedBalance - totalAmount))}</p>
                                                 </div>
                                             </div>
                                         )}

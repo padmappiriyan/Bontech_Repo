@@ -1,6 +1,7 @@
 import { userEventBus, USER_EVENTS } from '../events/userEvents.js';
 import { User, USER_ROLES } from '../models/user.model.js';
 import { Activity, ACTIVITY_TYPES } from '../models/activity.model.js';
+import { sendWelcomeCredentialsEmail } from '../services/emailService.js';
 import ExcelJS from 'exceljs';
 import fs from 'fs';
 import path from 'path';
@@ -16,6 +17,8 @@ const processBulkUpload = async (data) => {
         success: 0,
         failed: 0,
         skipped: 0,
+        emailsSent: 0,
+        emailsFailed: 0,
         errors: []
     };
 
@@ -72,6 +75,27 @@ const processBulkUpload = async (data) => {
                 try {
                     await User.create(u);
                     results.success++;
+
+                    const emailResult = await sendWelcomeCredentialsEmail({
+                        name: u.name,
+                        email: u.email,
+                        password: u.password,
+                        role: u.role,
+                    });
+                    if (emailResult.sent) {
+                        results.emailsSent++;
+                        console.log('[UserWorker] Credentials email sent:', {
+                            email: u.email,
+                            messageId: emailResult.messageId,
+                        });
+                    } else {
+                        results.emailsFailed++;
+                        console.warn('[UserWorker] Credentials email failed:', {
+                            email: u.email,
+                            reason: emailResult.error,
+                        });
+                        results.errors.push(`Email ${u.email}: account created but credentials email failed (${emailResult.error})`);
+                    }
                 } catch (err) {
                     results.failed++;
                     results.errors.push(`Email ${u.email}: ${err.message}`);
@@ -83,12 +107,14 @@ const processBulkUpload = async (data) => {
         await Activity.logAction({
             user: adminUser._id,
             actionType: ACTIVITY_TYPES.USER_CREATE,
-            description: `Bulk Upload Results: ${results.success} Success, ${results.failed} Failed, ${results.skipped} Skipped`,
+            description: `Bulk Upload Results: ${results.success} Success, ${results.failed} Failed, ${results.skipped} Skipped, ${results.emailsSent} Emails Sent`,
             details: { 
                 type: 'BULK_UPLOAD',
                 successCount: results.success, 
                 failedCount: results.failed, 
                 skippedCount: results.skipped,
+                emailsSent: results.emailsSent,
+                emailsFailed: results.emailsFailed,
                 errors: results.errors.slice(0, 10) // Limit errors in activity log
             },
             ipAddress: clientIp,
