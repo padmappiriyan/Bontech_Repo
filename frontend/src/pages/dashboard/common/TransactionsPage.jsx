@@ -9,7 +9,7 @@ const TransactionsPage = () => {
 
     const fetchLedger = async () => {
         try {
-            const res = await getLedgerStatus({ currency: 'LKR' });
+            const res = await getLedgerStatus({ currency: 'EUR' });
             setLedger(res.data);
         } catch (err) {
             console.error('Failed to fetch ledger:', err);
