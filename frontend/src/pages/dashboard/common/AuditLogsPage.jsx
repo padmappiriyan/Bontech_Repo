@@ -1,317 +1,590 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    FiSearch, FiFilter, FiCalendar, FiShield, FiChevronLeft, 
-    FiChevronRight, FiUser, FiActivity, FiFileText, FiInfo, FiX, FiChevronDown
+import {
+    FiShield, FiChevronLeft, FiChevronRight,
+    FiCalendar, FiFilter, FiSend, FiArrowDownCircle,
+    FiDatabase, FiActivity, FiClock, FiX, FiRefreshCw,
+    FiGlobe
 } from 'react-icons/fi';
 import { getAuditLogs } from '../../../api/auditLogApi';
-import { getAllUsers } from '../../../api/userApi';
-import useAuthRoles from '../../../hooks/useAuthRoles';
-import { format } from 'date-fns';
+import useSettings from '../../../hooks/useSettings';
+import { format, isToday, isYesterday, parseISO, isSameDay } from 'date-fns';
 
-// ── Constants & Helpers ──
-const ACTION_CONFIG = {
-    CREATE: { color: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'Transaction Recorded' },
-    UPDATE: { color: 'bg-amber-100 text-amber-700 border-amber-200', label: 'Transaction Modified' },
-    EXPORT: { color: 'bg-indigo-100 text-indigo-700 border-indigo-200', label: 'Ledger Exported' },
-    DELETE: { color: 'bg-red-100 text-red-700 border-red-200', label: 'Record Deleted' },
-    DEFAULT: { color: 'bg-neutral-100 text-neutral-500 border-neutral-200', label: 'Activity Logged' }
+// ─── Event Type Config ───────────────────────────────────────────────────────
+const EVENT_TYPES = [
+    {
+        value: 'send',
+        label: 'Send',
+        icon: FiSend,
+        color: 'text-emerald-600',
+        bg: 'bg-emerald-50',
+        border: 'border-emerald-200',
+        dot: 'bg-emerald-400',
+        badge: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    },
+    {
+        value: 'receive',
+        label: 'Paid',
+        icon: FiArrowDownCircle,
+        color: 'text-indigo-600',
+        bg: 'bg-indigo-50',
+        border: 'border-indigo-200',
+        dot: 'bg-indigo-400',
+        badge: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+    },
+    {
+        value: 'deposit',
+        label: 'Deposit',
+        icon: FiDatabase,
+        color: 'text-amber-600',
+        bg: 'bg-amber-50',
+        border: 'border-amber-200',
+        dot: 'bg-amber-400',
+        badge: 'bg-amber-100 text-amber-700 border-amber-200',
+    },
+];
+
+const getEventStyle = (type) =>
+    EVENT_TYPES.find((e) => e.value === type) || {
+        label: type?.toUpperCase() || 'ACTIVITY',
+        icon: FiActivity,
+        color: 'text-neutral-500',
+        bg: 'bg-neutral-50',
+        border: 'border-neutral-200',
+        dot: 'bg-neutral-300',
+        badge: 'bg-neutral-100 text-neutral-600 border-neutral-200',
+    };
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const getDateLabel = (dateStr) => {
+    try {
+        const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+        if (isToday(d)) return 'Today';
+        if (isYesterday(d)) return 'Yesterday';
+        return format(d, 'dd MMMM yyyy');
+    } catch {
+        return 'Unknown Date';
+    }
 };
 
-const AuditLogCard = ({ log, idx }) => {
-    const config = ACTION_CONFIG[log.action] || ACTION_CONFIG.DEFAULT;
-    
+const groupLogsByDate = (logs) => {
+    const groups = [];
+    let currentDate = null;
+    let currentGroup = null;
+
+    logs.forEach((log) => {
+        const logDate = new Date(log.timestamp);
+        if (!currentDate || !isSameDay(logDate, currentDate)) {
+            currentDate = logDate;
+            currentGroup = { date: logDate, label: getDateLabel(log.timestamp), entries: [] };
+            groups.push(currentGroup);
+        }
+        currentGroup.entries.push(log);
+    });
+
+    return groups;
+};
+
+const getPlatformDisplayName = (slug = '') => {
+    const map = {
+        ria: 'Ria',
+        moneygram: 'Moneygram',
+        'western-union': 'Western Union',
+        'western_union': 'Western Union',
+    };
+    return map[slug?.toLowerCase()] || slug?.replace(/-|_/g, ' ') || 'Unknown Platform';
+};
+
+// ─── Timeline Entry Card ─────────────────────────────────────────────────────
+const TimelineEntry = ({ log, idx, isLast }) => {
+    const rawType = log.details?.type || log.transactionId?.type || '';
+    const style = getEventStyle(rawType);
+    const Icon = style.icon;
+
+    const platform =
+        log.details?.platform || log.transactionId?.platform || '';
+    const amount =
+        log.details?.amount ?? log.transactionId?.amount ?? null;
+    const currency = log.transactionId?.currency || 'EUR';
+    const userEmail = log.userId?.email || 'System';
+    const timeStr = format(new Date(log.timestamp), 'HH:mm');
+
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ delay: idx * 0.05 }}
-            className="group bg-white rounded-[24px] p-5 shadow-[0_2px_15px_rgb(0,0,0,0.02)] border border-neutral-100 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:border-indigo-100 transition-all duration-300 flex items-center justify-between"
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.04, duration: 0.3 }}
+            className="flex gap-4 relative"
         >
-            <div className="flex items-center gap-5 flex-1">
-                <div className="flex items-center gap-4 min-w-[240px]">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 flex items-center justify-center text-indigo-600 font-black text-sm shadow-sm">
-                        {log.userId?.email?.[0]?.toUpperCase() || 'S'}
-                    </div>
-                    <div>
-                        <h4 className="text-sm font-black text-brand-600 tracking-tight truncate max-w-[160px]">
-                            {log.userId?.email?.split('@')[0] || 'SYSTEM'}
-                        </h4>
-                        <p className="text-[10px] font-bold text-brand-400 uppercase tracking-tight mt-0.5">
-                            {log.userId?.role || 'Administrator'}
-                        </p>
-                    </div>
-                </div>
-
-                <div className="flex-1 px-4">
-                    <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-lg text-[9px] font-black tracking-tight uppercase border ${config.color}`}>
-                            {log.action}
-                        </span>
-                        <p className="text-sm font-bold text-brand-700 tracking-tight">
-                            {config.label}
-                        </p>
-                    </div>
-                    <p className="text-[11px] text-neutral-400 font-medium mt-1 line-clamp-1">
-                        Secured entry of {log.action.toLowerCase()} operation on target resource.
-                    </p>
-                </div>
+            {/* Timeline line + dot */}
+            <div className="flex flex-col items-center flex-shrink-0 w-8">
+                <div className={`w-3 h-3 rounded-full border-2 border-white shadow-md mt-1 flex-shrink-0 ${style.dot}`} />
+                {!isLast && (
+                    <div className="flex-1 w-px bg-neutral-100 mt-1" />
+                )}
             </div>
 
-            <div className="flex items-center gap-8">
-                <div className="text-right">
-                    <p className="text-xs font-black text-neutral-600 tracking-tight">
-                        {format(new Date(log.timestamp), 'dd MMM yyyy')}
-                    </p>
-                    <p className="text-[10px] font-bold text-neutral-400 tracking-widest mt-0.5">
-                        {format(new Date(log.timestamp), 'HH:mm:ss')}
-                    </p>
-                </div>
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 rounded-xl hover:bg-neutral-50 text-neutral-400 hover:text-indigo-600 transition-colors">
-                        <FiFileText size={16} />
-                    </button>
+            {/* Card */}
+            <div className={`flex-1 mb-4 bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group ${style.border}`}>
+                <div className="flex items-center gap-3 px-4 py-3">
+                    {/* Icon */}
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${style.bg}`}>
+                        <Icon size={15} className={style.color} />
+                    </div>
+
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${style.badge}`}>
+                                {style.label}
+                            </span>
+                            {platform && (
+                                <span className="text-[11px] font-bold text-neutral-700 truncate">
+                                    {getPlatformDisplayName(platform)}
+                                </span>
+                            )}
+                            {amount !== null && (
+                                <span className={`text-[11px] font-black ml-auto ${style.color}`}>
+                                    € {Number(amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-[10px] text-neutral-400 font-medium mt-0.5 truncate">
+                            {userEmail}
+                        </p>
+                    </div>
+
+                    {/* Time */}
+                    <div className="text-right flex-shrink-0 ml-2">
+                        <p className="text-[11px] font-black text-neutral-500 tabular-nums">{timeStr}</p>
+                    </div>
                 </div>
             </div>
         </motion.div>
     );
 };
 
+// ─── Filter Checkbox Group ────────────────────────────────────────────────────
+const FilterCheckbox = ({ checked, onChange, label, color = 'text-neutral-700' }) => (
+    <label className="flex items-center gap-2.5 cursor-pointer group py-1">
+        <div
+            onClick={onChange}
+            className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0 cursor-pointer
+                ${checked
+                    ? 'bg-indigo-600 border-indigo-600'
+                    : 'border-neutral-200 bg-white group-hover:border-indigo-300'
+                }`}
+        >
+            {checked && (
+                <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
+                    <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+            )}
+        </div>
+        <span className={`text-[12px] font-semibold ${color} group-hover:text-neutral-900 transition-colors`}>
+            {label}
+        </span>
+    </label>
+);
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 const AuditLogsPage = () => {
-    const { isAdminOrSupervisor } = useAuthRoles();
-    
+    const { activePlatforms, loadActivePlatforms } = useSettings();
+
     const [logs, setLogs] = useState([]);
-    const [usersList, setUsersList] = useState([]);
     const [meta, setMeta] = useState({ page: 1, pages: 1, total: 0 });
     const [loading, setLoading] = useState(true);
 
-    const [filters, setFilters] = useState({
-        action: '',
-        userId: '',
+    // Sidebar filter state
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [selectedEventTypes, setSelectedEventTypes] = useState([]);
+    const [selectedPlatforms, setSelectedPlatforms] = useState([]);
+
+    // Applied filters (only sent to API when user clicks Filter or clears)
+    const [appliedFilters, setAppliedFilters] = useState({
         startDate: '',
         endDate: '',
+        eventTypes: [],
+        platforms: [],
         pageNumber: 1,
-        pageSize: 5
+        pageSize: 20,
     });
+
+    useEffect(() => {
+        loadActivePlatforms();
+    }, [loadActivePlatforms]);
 
     const fetchLogs = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await getAuditLogs(filters);
-            setLogs(response.data);
+            const params = {
+                pageNumber: appliedFilters.pageNumber,
+                pageSize: appliedFilters.pageSize,
+            };
+            if (appliedFilters.startDate) params.startDate = appliedFilters.startDate;
+            if (appliedFilters.endDate) params.endDate = appliedFilters.endDate;
+            if (appliedFilters.eventTypes.length > 0)
+                params.eventType = appliedFilters.eventTypes.join(',');
+            if (appliedFilters.platforms.length > 0)
+                params.platform = appliedFilters.platforms.join(',');
+
+            const response = await getAuditLogs(params);
+            setLogs(response.data || []);
             setMeta({
-                page: response.page,
-                pages: response.pages,
-                total: response.total
+                page: response.page || 1,
+                pages: response.pages || 1,
+                total: response.total || 0,
             });
-        } catch (error) {
-            console.error("Failed to fetch audit logs", error);
+        } catch (err) {
+            console.error('Failed to fetch audit logs', err);
         } finally {
             setLoading(false);
         }
-    }, [filters]);
-
-    const fetchDropdownData = useCallback(async () => {
-        if (!isAdminOrSupervisor) return;
-        try {
-            const data = await getAllUsers({ limit: 100 });
-            setUsersList(data.users || []);
-        } catch (err) {
-            console.error("Could not load users for filtering", err);
-        }
-    }, [isAdminOrSupervisor]);
+    }, [appliedFilters]);
 
     useEffect(() => {
         fetchLogs();
     }, [fetchLogs]);
 
-    useEffect(() => {
-        fetchDropdownData();
-    }, [fetchDropdownData]);
+    const handleApplyFilters = () => {
+        setAppliedFilters({
+            startDate,
+            endDate,
+            eventTypes: selectedEventTypes,
+            platforms: selectedPlatforms,
+            pageNumber: 1,
+            pageSize: 20,
+        });
+    };
 
-    const handleFilterChange = (e) => {
-        const { name, value } = e.target;
-        setFilters(prev => ({ ...prev, [name]: value, pageNumber: 1 }));
+    const handleClearFilters = () => {
+        setStartDate('');
+        setEndDate('');
+        setSelectedEventTypes([]);
+        setSelectedPlatforms([]);
+        setAppliedFilters({
+            startDate: '',
+            endDate: '',
+            eventTypes: [],
+            platforms: [],
+            pageNumber: 1,
+            pageSize: 20,
+        });
+    };
+
+    const toggleEventType = (val) => {
+        setSelectedEventTypes((prev) =>
+            prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
+        );
+    };
+
+    const togglePlatform = (slug) => {
+        setSelectedPlatforms((prev) =>
+            prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+        );
     };
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= meta.pages) {
-            setFilters(prev => ({ ...prev, pageNumber: newPage }));
+            setAppliedFilters((prev) => ({ ...prev, pageNumber: newPage }));
         }
     };
 
+    const hasActiveFilters =
+        appliedFilters.startDate ||
+        appliedFilters.endDate ||
+        appliedFilters.eventTypes.length > 0 ||
+        appliedFilters.platforms.length > 0;
+
+    const grouped = groupLogsByDate(logs);
+
     return (
-        <div className="p-4 md:p-8 mx-auto max-w-7xl">
-            <div className="space-y-8">
-                {/* ── Header ── */}
-                <div className="flex items-center gap-3 px-2">
-                    <FiActivity className="text-indigo-500" />
-                    <h2 className="text-md font-bold text-brand-600 tracking-tight">
-                        {isAdminOrSupervisor ? 'System Activity Stream' : 'My Activity Stream'}
-                    </h2>
+        <div className="p-4 md:p-6 w-full">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25">
+                        <FiActivity size={16} />
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-black text-neutral-900 tracking-tight">Audit Log</h1>
+                        <p className="text-[11px] text-neutral-400 font-medium">Secure activity trail for all platform entries</p>
+                    </div>
                 </div>
 
-                {/* ── Redesigned Filter Section (Full Width) ── */}
-                <div className="bg-white rounded-[32px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-neutral-100">
-                    {/* Top Row: Search & Status */}
-                    <div className="flex flex-col md:flex-row gap-4 mb-6">
-                        <div className="flex-[2] relative group">
-                            <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-indigo-500 transition-colors z-10 size-5" />
-                            <input
-                                type="text"
-                                placeholder="Search logs by activity or content..."
-                                className="w-full pl-14 pr-6 py-4 rounded-[20px] bg-neutral-50/50 border border-neutral-100 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all text-[13px] font-medium text-neutral-700 placeholder:text-neutral-400"
+                <button
+                    onClick={fetchLogs}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-neutral-100 text-neutral-500 text-[11px] font-bold uppercase tracking-wider hover:border-indigo-200 hover:text-indigo-600 transition-all shadow-sm"
+                >
+                    <FiRefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+                    Refresh
+                </button>
+            </div>
+
+            {/* Two-column layout */}
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+                {/* ── LEFT: Timeline Feed ── */}
+                <div className="flex-1 min-w-0">
+
+                    {/* Active filter pills */}
+                    {hasActiveFilters && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {appliedFilters.eventTypes.map((t) => {
+                                const s = getEventStyle(t);
+                                return (
+                                    <span key={t} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border ${s.badge}`}>
+                                        {s.label}
+                                        <FiX size={10} className="cursor-pointer opacity-60 hover:opacity-100" onClick={() => {
+                                            setSelectedEventTypes(p => p.filter(v => v !== t));
+                                            setAppliedFilters(p => ({ ...p, eventTypes: p.eventTypes.filter(v => v !== t), pageNumber: 1 }));
+                                        }} />
+                                    </span>
+                                );
+                            })}
+                            {appliedFilters.platforms.map((slug) => (
+                                <span key={slug} className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border bg-violet-50 text-violet-700 border-violet-200">
+                                    <FiGlobe size={10} />
+                                    {getPlatformDisplayName(slug)}
+                                    <FiX size={10} className="cursor-pointer opacity-60 hover:opacity-100" onClick={() => {
+                                        setSelectedPlatforms(p => p.filter(s => s !== slug));
+                                        setAppliedFilters(p => ({ ...p, platforms: p.platforms.filter(s => s !== slug), pageNumber: 1 }));
+                                    }} />
+                                </span>
+                            ))}
+                            {(appliedFilters.startDate || appliedFilters.endDate) && (
+                                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border bg-slate-50 text-slate-600 border-slate-200">
+                                    <FiCalendar size={10} />
+                                    {appliedFilters.startDate || '…'} → {appliedFilters.endDate || '…'}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Loading bar */}
+                    {loading && (
+                        <div className="h-1 w-full bg-indigo-50 rounded-full overflow-hidden mb-4">
+                            <motion.div
+                                className="h-full bg-indigo-500 rounded-full"
+                                initial={{ width: '0%' }}
+                                animate={{ width: '100%' }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                             />
                         </div>
-                        
-                        <div className="flex-1 relative group">
-                            <FiShield className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 group-hover:text-indigo-500 transition-colors z-10 pointer-events-none size-5" />
-                            <select
-                                name="action"
-                                value={filters.action}
-                                onChange={handleFilterChange}
-                                className="w-full pl-14 pr-12 py-4 rounded-[20px] bg-neutral-50/50 border border-neutral-100 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all text-[13px] font-bold text-neutral-600 appearance-none cursor-pointer"
-                            >
-                                <option value="">All Status</option>
-                                {Object.keys(ACTION_CONFIG).filter(k => k !== 'DEFAULT').map(key => (
-                                    <option key={key} value={key}>{ACTION_CONFIG[key].label}</option>
-                                ))}
-                            </select>
-                            <FiChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none size-4" />
-                        </div>
+                    )}
 
-                        {isAdminOrSupervisor && (
-                            <div className="flex-1 relative group">
-                                <FiUser className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-400 group-hover:text-indigo-500 transition-colors z-10 pointer-events-none size-5" />
-                                <select
-                                    name="userId"
-                                    value={filters.userId}
-                                    onChange={handleFilterChange}
-                                    className="w-full pl-14 pr-12 py-4 rounded-[20px] bg-neutral-50/50 border border-neutral-100 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all text-[13px] font-bold text-neutral-600 appearance-none cursor-pointer"
+                    {/* Timeline */}
+                    <div className="bg-white rounded-3xl border border-neutral-100 shadow-sm p-6 min-h-[500px]">
+                        <AnimatePresence mode="popLayout">
+                            {!loading && logs.length === 0 ? (
+                                <motion.div
+                                    key="empty"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex flex-col items-center justify-center min-h-[400px] gap-4"
                                 >
-                                    <option value="">All Users</option>
-                                    {usersList.map(u => (
-                                        <option key={u.id} value={u.id}>{u.name.split(' ')[0]} ({u.role})</option>
+                                    <div className="w-20 h-20 bg-neutral-50 rounded-full flex items-center justify-center text-neutral-200">
+                                        <FiShield size={40} />
+                                    </div>
+                                    <p className="text-lg font-black text-neutral-700 tracking-tight">No records found</p>
+                                    <p className="text-sm text-neutral-400 font-medium text-center max-w-xs">
+                                        No audit log entries match your current filters. Try clearing filters or adjusting the date range.
+                                    </p>
+                                    {hasActiveFilters && (
+                                        <button
+                                            onClick={handleClearFilters}
+                                            className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-[11px] font-black uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/20"
+                                        >
+                                            Clear All Filters
+                                        </button>
+                                    )}
+                                </motion.div>
+                            ) : (
+                                <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                                    {grouped.map((group, gIdx) => (
+                                        <div key={gIdx} className="mb-4">
+                                            {/* Date divider */}
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="flex items-center gap-2 bg-neutral-50 border border-neutral-100 px-3 py-1 rounded-full">
+                                                    <FiClock size={11} className="text-neutral-400" />
+                                                    <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">
+                                                        {group.label}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-1 h-px bg-neutral-50" />
+                                            </div>
+
+                                            {/* Entries */}
+                                            {group.entries.map((log, idx) => (
+                                                <TimelineEntry
+                                                    key={log._id}
+                                                    log={log}
+                                                    idx={idx}
+                                                    isLast={idx === group.entries.length - 1 && gIdx === grouped.length - 1}
+                                                />
+                                            ))}
+                                        </div>
                                     ))}
-                                </select>
-                                <FiChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none size-4" />
-                            </div>
-                        )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* Bottom Row: Dates & Clear */}
-                    <div className="flex flex-col md:flex-row items-end gap-4">
-                        <div className="flex-1 space-y-2.5">
-                            <label className="text-[10px] font-black text-[#8792a2] uppercase tracking-[0.15em] ml-1">Last Updated From</label>
-                            <div className="relative group">
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    value={filters.startDate}
-                                    onChange={handleFilterChange}
-                                    className="w-full pl-5 pr-12 py-4 rounded-[20px] bg-neutral-50/50 border border-neutral-100 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all text-[13px] font-bold text-neutral-700 cursor-pointer"
-                                />
-                                <FiCalendar className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none size-5" />
-                            </div>
-                        </div>
-
-                        <div className="flex-1 space-y-2.5">
-                            <label className="text-[10px] font-black text-[#8792a2] uppercase tracking-[0.15em] ml-1">Last Updated To</label>
-                            <div className="relative group">
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    value={filters.endDate}
-                                    onChange={handleFilterChange}
-                                    className="w-full pl-5 pr-12 py-4 rounded-[20px] bg-neutral-50/50 border border-neutral-100 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all text-[13px] font-bold text-neutral-700 cursor-pointer"
-                                />
-                                <FiCalendar className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none size-5" />
-                            </div>
-                        </div>
-
-                        <div className="pb-1.5 px-2">
+                    {/* Pagination */}
+                    <div className="mt-3 flex items-center justify-between bg-white rounded-2xl px-5 py-3 border border-neutral-100 shadow-sm">
+                        <p className="text-[11px] font-bold text-neutral-400 tracking-wide">
+                            Page <span className="text-neutral-800 font-black">{meta.page}</span> of {meta.pages || 1}
+                            <span className="mx-3 text-neutral-200">|</span>
+                            <span className="text-indigo-600 font-black">{meta.total}</span> entries
+                        </p>
+                        <div className="flex gap-2">
                             <button
-                                onClick={() => setFilters({
-                                    action: '',
-                                    userId: '',
-                                    startDate: '',
-                                    endDate: '',
-                                    pageNumber: 1,
-                                    pageSize: 5
-                                })}
-                                className="text-[11px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest px-4 py-2 transition-all hover:scale-105 active:scale-95"
+                                onClick={() => handlePageChange(meta.page - 1)}
+                                disabled={meta.page === 1 || loading}
+                                className="w-8 h-8 flex items-center justify-center rounded-xl border border-neutral-100 text-neutral-500 hover:bg-neutral-50 disabled:opacity-30 transition-all"
                             >
-                                Clear Filters
+                                <FiChevronLeft size={14} />
+                            </button>
+                            <button
+                                onClick={() => handlePageChange(meta.page + 1)}
+                                disabled={meta.page === meta.pages || loading}
+                                className="w-8 h-8 flex items-center justify-center rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-30 transition-all"
+                            >
+                                <FiChevronRight size={14} />
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* ── Audit Logs List ── */}
-                <div className="relative">
-                    {loading && (
-                        <div className="absolute inset-x-0 top-0 h-2 z-20">
-                            <div className="h-full bg-indigo-500/10 overflow-hidden rounded-full">
-                                <motion.div
-                                    className="h-full bg-indigo-500"
-                                    initial={{ width: "0%" }}
-                                    animate={{ width: "100%" }}
-                                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                                />
-                            </div>
-                        </div>
-                    )}
+                {/* ── RIGHT: Sticky Filters Sidebar ── */}
+                <div className="w-full lg:w-72 flex-shrink-0 lg:sticky lg:top-6 space-y-4">
 
-                    <div className="space-y-3">
-                        <AnimatePresence mode='popLayout'>
-                            {!loading && logs.length === 0 ? (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="bg-white rounded-[32px] p-20 text-center border border-dashed border-neutral-200 outline outline-8 outline-neutral-50/50"
+                    <div className=" overflow-hidden">
+                        {/* Sidebar Header */}
+                        <div className="px-5 py-4 border-b border-neutral-50 bg-neutral-50/50 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <FiFilter size={14} className="text-indigo-500" />
+                                <span className="text-[12px] font-black text-neutral-700 uppercase tracking-widest">Filters</span>
+                            </div>
+                            {hasActiveFilters && (
+                                <button
+                                    onClick={handleClearFilters}
+                                    className="text-[10px] font-bold text-rose-400 hover:text-rose-600 transition-colors uppercase tracking-wider"
                                 >
-                                    <div className="flex flex-col items-center gap-6">
-                                        <div className="w-24 h-24 bg-neutral-50 rounded-full flex items-center justify-center text-neutral-300">
-                                            <FiShield size={48} />
-                                        </div>
-                                        <div>
-                                            <p className="text-xl font-black text-neutral-800 tracking-tight">No records detected</p>
-                                            <p className="text-sm text-neutral-400 font-medium mt-1">The audit vault is currently empty for these parameters.</p>
+                                    Clear All
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="p-5 space-y-6">
+
+                            {/* ① Filter by Time */}
+                            <div>
+                                <p className="text-[12px] font-bold mb-3 flex items-center gap-1.5">
+                                    <FiClock size={11} />
+                                    Filter by Time
+                                </p>
+                                <div className="space-y-2.5">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-neutral-400 ml-1">From</label>
+                                        <div className="relative">
+                                            <input
+                                                type="date"
+                                                value={startDate}
+                                                onChange={(e) => setStartDate(e.target.value)}
+                                                className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-100 text-[12px] font-medium text-neutral-700 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-200 transition-all cursor-pointer"
+                                            />
                                         </div>
                                     </div>
-                                </motion.div>
-                            ) : (
-                                logs.map((log, idx) => (
-                                    <AuditLogCard key={log._id} log={log} idx={idx} />
-                                ))
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-neutral-400 ml-1">To</label>
+                                        <div className="relative">
+                                            <input
+                                                type="date"
+                                                value={endDate}
+                                                onChange={(e) => setEndDate(e.target.value)}
+                                                className="w-full px-3 py-2.5 rounded-xl bg-neutral-50 border border-neutral-100 text-[12px] font-medium text-neutral-700 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-200 transition-all cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleApplyFilters}
+                                        className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-[11px] font-bold  hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/20 active:scale-[0.98]"
+                                    >
+                                        Apply Filter
+                                    </button>
+                                </div>
+                            </div>
 
-                {/* ── Pagination ── */}
-                <div className="mt-2 flex items-center justify-between bg-white rounded-[24px] p-4 shadow-sm border border-neutral-100">
-                    <p className="text-[11px] font-bold text-neutral-400 tracking-wider px-4">
-                        PAGE <span className="text-neutral-900 font-black">{meta.page}</span> / {meta.pages || 1}
-                        <span className="mx-4 text-neutral-200">|</span>
-                        TOTAL <span className="text-indigo-600 font-black">{meta.total}</span> LOGS
-                    </p>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => handlePageChange(meta.page - 1)}
-                            disabled={meta.page === 1 || loading}
-                            className="px-4 py-2 rounded-xl border border-neutral-100 text-[11px] font-black uppercase tracking-widest text-neutral-600 hover:bg-neutral-50 disabled:opacity-30 transition-all font-bold"
-                        >
-                            Previous
-                        </button>
-                        <button
-                            onClick={() => handlePageChange(meta.page + 1)}
-                            disabled={meta.page === meta.pages || loading}
-                            className="px-4 py-2 rounded-xl bg-neutral-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-neutral-800 disabled:opacity-30 transition-all shadow-lg shadow-neutral-200 font-bold"
-                        >
-                            Next
-                        </button>
+                            <div className="h-px bg-neutral-50" />
+
+                            {/* ② Filter by Event Type */}
+                            <div>
+                                <p className="text-[12px] font-bold mb-3 flex items-center gap-1.5">
+                                    <FiActivity size={11} />
+                                    Filter by Event Type
+                                </p>
+                                <div className="space-y-0.5">
+                                    {EVENT_TYPES.map((evt) => (
+                                        <FilterCheckbox
+                                            key={evt.value}
+                                            checked={selectedEventTypes.includes(evt.value)}
+                                            onChange={() => {
+                                                toggleEventType(evt.value);
+                                            }}
+                                            label={evt.label}
+                                            color={evt.color}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="h-px bg-neutral-50" />
+
+                            {/* ③ Filter by Platform */}
+                            <div>
+                                <p className="text-[12px] font-bold  mb-3 flex items-center gap-1.5">
+                                    <FiGlobe size={11} />
+                                    Filter by Platform
+                                </p>
+                                {activePlatforms.length === 0 ? (
+                                    <p className="text-[11px] text-neutral-300 font-medium">No platforms available.</p>
+                                ) : (
+                                    <div className="space-y-0.5">
+                                        {activePlatforms.map((platform) => {
+                                            const slug = platform.slug || platform._id || platform.id;
+                                            return (
+                                                <FilterCheckbox
+                                                    key={slug}
+                                                    checked={selectedPlatforms.includes(slug)}
+                                                    onChange={() => togglePlatform(slug)}
+                                                    label={platform.name}
+                                                    color="text-violet-600"
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Apply button (for event type + platform changes) */}
+                            <button
+                                onClick={handleApplyFilters}
+                                className="w-full py-2.5 rounded-xl bg-neutral-900 text-white text-[11px] font-bold  hover:bg-neutral-800 transition-all shadow-md active:scale-[0.98]"
+                            >
+                                Apply All Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Stats card */}
+                    <div className="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-3xl p-5 text-white shadow-xl shadow-indigo-600/20">
+                        <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Total Records</p>
+                        <p className="text-3xl font-black tracking-tight">{meta.total}</p>
+                        <p className="text-[11px] opacity-60 font-medium mt-1">
+                            {hasActiveFilters ? 'matching current filters' : 'all time entries'}
+                        </p>
                     </div>
                 </div>
             </div>
