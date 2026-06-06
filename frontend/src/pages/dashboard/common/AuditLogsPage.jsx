@@ -107,57 +107,50 @@ const TimelineEntry = ({ log, idx, isLast }) => {
         log.details?.amount ?? log.transactionId?.amount ?? null;
     const currency = log.transactionId?.currency || 'EUR';
     const userEmail = log.userId?.email || 'System';
-    const timeStr = format(new Date(log.timestamp), 'HH:mm');
+    const timeStr = format(new Date(log.timestamp), 'HH:mm:ss');
 
     return (
         <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.04, duration: 0.3 }}
-            className="flex gap-4 relative"
+            className="flex relative group min-h-[60px]"
         >
+            {/* Time */}
+            <div className="w-16 flex-shrink-0 text-right pr-4 pt-0.5">
+                <p className="text-[11px] font-medium text-neutral-500 tabular-nums">{timeStr}</p>
+            </div>
+
             {/* Timeline line + dot */}
-            <div className="flex flex-col items-center flex-shrink-0 w-8">
-                <div className={`w-3 h-3 rounded-full border-2 border-white shadow-md mt-1 flex-shrink-0 ${style.dot}`} />
+            <div className="flex flex-col items-center flex-shrink-0 relative w-6">
+                <div className={`w-5 h-5 rounded-full border-2 border-white shadow-sm flex items-center justify-center z-10 mt-0.5 ${style.bg}`}>
+                    <Icon size={10} className={style.color} />
+                </div>
                 {!isLast && (
-                    <div className="flex-1 w-px bg-neutral-100 mt-1" />
+                    <div className="w-px bg-neutral-200 flex-grow" />
                 )}
             </div>
 
-            {/* Card */}
-            <div className={`flex-1 mb-4 bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group ${style.border}`}>
-                <div className="flex items-center gap-3 px-4 py-3">
-                    {/* Icon */}
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${style.bg}`}>
-                        <Icon size={15} className={style.color} />
-                    </div>
-
-                    {/* Details */}
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${style.badge}`}>
-                                {style.label}
-                            </span>
-                            {platform && (
-                                <span className="text-[11px] font-bold text-neutral-700 truncate">
-                                    {getPlatformDisplayName(platform)}
-                                </span>
-                            )}
-                            {amount !== null && (
-                                <span className={`text-[11px] font-black ml-auto ${style.color}`}>
-                                    € {Number(amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
-                                </span>
-                            )}
-                        </div>
-                        <p className="text-[10px] text-neutral-400 font-medium mt-0.5 truncate">
-                            {userEmail}
-                        </p>
-                    </div>
-
-                    {/* Time */}
-                    <div className="text-right flex-shrink-0 ml-2">
-                        <p className="text-[11px] font-black text-neutral-500 tabular-nums">{timeStr}</p>
-                    </div>
+            {/* Content */}
+            <div className="flex-1 pl-3 pb-6 pt-0.5">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <span className="text-[13px] text-cyan-500 font-medium">
+                        {userEmail}
+                    </span>
+                    <span className="text-[13px] font-bold text-neutral-800">
+                        {style.label} {platform ? `on ${getPlatformDisplayName(platform)}` : ''}
+                    </span>
+                    {amount !== null && (
+                        <span className={`text-[12px] font-bold ml-auto ${style.color}`}>
+                            € {Number(amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                        </span>
+                    )}
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
+                    {log.details?.ipAddress && (
+                        <span>IP Address: {log.details.ipAddress}</span>
+                    )}
+                    {log.details?.ipAddress && log.details?.peer && <span> Peer: {log.details.peer}</span>}
                 </div>
             </div>
         </motion.div>
