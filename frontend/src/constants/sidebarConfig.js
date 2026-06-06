@@ -1,4 +1,4 @@
-import { FiGrid, FiDollarSign, FiGitPullRequest, FiUsers, FiShield, FiActivity, FiUser, FiLayers, FiTrendingUp, FiBarChart } from 'react-icons/fi';
+import { FiGrid, FiDollarSign, FiGitPullRequest, FiUsers, FiShield, FiActivity, FiUser, FiLayers, FiTrendingUp, FiBarChart, FiFileText } from 'react-icons/fi';
 
 /**
  * Common sidebar items shared across multiple roles.
@@ -11,6 +11,7 @@ const COMMON_ITEMS = {
   SYSTEM_LOGS: { label: 'System Logs', path: '/dashboard/activity-timeline', icon: FiActivity },
   PROFILE: { label: 'Profile', path: '/dashboard/profile', icon: FiUser },
   REPORTS: { label: 'Reports', path: '/dashboard/reports', icon: FiBarChart },
+  EXCEL: { label: 'Excel', path: '/dashboard/excel', icon: FiFileText },
 };
 
 /**
@@ -26,6 +27,7 @@ export const SIDEBAR_CONFIG = {
     { label: 'Users', path: '/dashboard/users', icon: FiUsers },
     { label: 'User Records', path: '/dashboard/user-records', icon: FiUsers },
     COMMON_ITEMS.REPORTS,
+    COMMON_ITEMS.EXCEL,
     COMMON_ITEMS.AUDIT_LOGS,
     COMMON_ITEMS.SYSTEM_LOGS,
     COMMON_ITEMS.PROFILE,
@@ -35,6 +37,7 @@ export const SIDEBAR_CONFIG = {
     COMMON_ITEMS.TRANSACTIONS,
     { label: 'Market Rates', path: '/dashboard/rates', icon: FiTrendingUp },
     COMMON_ITEMS.CHANGE_REQUESTS,
+    COMMON_ITEMS.EXCEL,
     COMMON_ITEMS.AUDIT_LOGS,
     COMMON_ITEMS.SYSTEM_LOGS,
     COMMON_ITEMS.PROFILE,
@@ -42,6 +45,7 @@ export const SIDEBAR_CONFIG = {
   user: [
     COMMON_ITEMS.DASHBOARD,
     COMMON_ITEMS.TRANSACTIONS,
+    COMMON_ITEMS.EXCEL,
     COMMON_ITEMS.CHANGE_REQUESTS,
     COMMON_ITEMS.AUDIT_LOGS,
     COMMON_ITEMS.SYSTEM_LOGS,

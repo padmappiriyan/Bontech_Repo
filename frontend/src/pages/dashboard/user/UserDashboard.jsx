@@ -80,7 +80,7 @@ const UserDashboard = ({ userInfo }) => {
         try {
             setStartLoading(true);
             const suggested = ledgerStatus?.suggestedOpening || 0;
-            await openLedger({ openingBalance: suggested, currency: 'LKR' });
+            await openLedger({ openingBalance: suggested, currency: 'EUR' });
             toast.success('Day started successfully');
             await checkLedgerStatus();
             dispatch(fetchMyBalances());
@@ -95,8 +95,9 @@ const UserDashboard = ({ userInfo }) => {
     const handleCloseDayConfirm = async () => {
         try {
             setLoading(true);
-            await lockLedger({}); // Initiates shift locking without requiring billetage
+            await lockLedger({ currency: 'EUR' }); // Initiates shift locking without requiring billetage
             toast.success('Shift locked for reconciliation');
+            setIsCloseDayModalOpen(false); // Close the modal upon success
             await checkLedgerStatus(); // Refresh status to set isClosed to true
             scrollToReconciliation();
         } catch (error) {

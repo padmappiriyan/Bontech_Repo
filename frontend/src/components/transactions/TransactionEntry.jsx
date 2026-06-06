@@ -7,6 +7,7 @@ import {
 import { recordTransaction, resetStatus as resetTransactionStatus } from '../../redux/features/transactions/transactionSlice';
 import { fetchMyBalances } from '../../redux/features/userBalance/userBalanceSlice';
 import useSettings from '../../hooks/useSettings';
+import { appendLedgerEntry } from '../../utils/excelLedgerStorage';
 
 // Section Components
 import SourceClassification from './sections/SourceClassification';
@@ -61,6 +62,13 @@ const TransactionEntry = ({ onComplete, ledger, initialPlatform }) => {
     // Handle form reset and status cleanup on success
     useEffect(() => {
         if (success) {
+            appendLedgerEntry({
+                platformKey: formData.platform,
+                type: formData.type,
+                amount: formData.amount,
+                date: new Date(),
+            });
+
             // REFETCH PLATFORM BALANCES GLOBALLY with a delay to allow the backend
             // event worker (statsWorker) to finish updating UserPlatformBalance first.
             setTimeout(() => {

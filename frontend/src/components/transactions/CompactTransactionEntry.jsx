@@ -8,6 +8,7 @@ import { recordTransaction, resetStatus as resetTransactionStatus } from '../../
 import { fetchMyBalances } from '../../redux/features/userBalance/userBalanceSlice';
 import useSettings from '../../hooks/useSettings';
 import toast from 'react-hot-toast';
+import { appendLedgerEntry } from '../../utils/excelLedgerStorage';
 
 const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
     const dispatch = useDispatch();
@@ -48,6 +49,13 @@ const CompactTransactionEntry = ({ onComplete, initialPlatform, isClosed }) => {
 
     useEffect(() => {
         if (success) {
+            appendLedgerEntry({
+                platformKey: formData.platform,
+                type: formData.type,
+                amount: formData.amount,
+                date: new Date(),
+            });
+
             toast.success('Transaction has been Created! and ' + "Ledger has been updated.");
             setTimeout(() => {
                 dispatch(fetchMyBalances());

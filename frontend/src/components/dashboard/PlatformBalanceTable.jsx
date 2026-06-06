@@ -143,7 +143,7 @@ const PlatformBalanceTable = ({ platforms, loading, isClosed }) => {
                                     className="overflow-hidden mt-6 pt-6 border-t border-neutral-100"
                                 >
                                     <CompactTransactionEntry
-                                        initialPlatform={platform.slug || platform.platformId}
+                                        initialPlatform={platform.slug}
                                         onComplete={() => setExpandedPlatformId(null)}
                                         isClosed={isClosed}
                                     />

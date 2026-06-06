@@ -25,7 +25,8 @@ const DashboardLayout = () => {
     '/dashboard/platforms': 'Source Classification',
     '/dashboard/rates': 'Global Rates Management',
     '/dashboard/reports': 'Business Intelligence',
-    '/dashboard/user-records': 'User Records'
+    '/dashboard/user-records': 'User Records',
+    '/dashboard/excel': 'Excel Workspace'
   };
 
   const pageTitle = routeTitles[location.pathname] || 'System Management';
