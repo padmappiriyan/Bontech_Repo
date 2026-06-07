@@ -88,8 +88,18 @@ const SharedTransactionList = ({
                 ))}
             </div>
 
-            {/* List Items matching Image 3 precisely */}
-            <div className="space-y-1 mb-6 relative">
+            {/* Table Header */}
+            <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl mb-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+                <div>Transaction ID</div>
+                <div>Date & Time</div>
+                <div>Platform</div>
+                <div>Status</div>
+                <div>Type & Amount</div>
+                <div className="w-8"></div>
+            </div>
+
+            {/* List Items matching requested table layout */}
+            <div className="space-y-1 mb-6 relative max-h-[520px] overflow-y-auto no-scrollbar pr-2">
                 {loading && (
                     <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
                         <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -104,64 +114,75 @@ const SharedTransactionList = ({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
-                            className="flex items-center justify-between py-4 group hover:bg-[#f8f9fc] rounded-xl px-2 -mx-2 transition-colors relative"
+                            className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-4 py-4 items-center group hover:bg-[#f8f9fc] rounded-xl border border-transparent hover:border-neutral-100 transition-colors relative"
                         >
-                            <div className="flex items-start gap-4">
-                                {/* Swap Icon matching Image 3 */}
-                                <div className="text-[#64748b] mt-1 ml-1 flex-shrink-0">
-                                    <FiRepeat size={18} strokeWidth={2.5} />
-                                </div>
-                                <div className="flex flex-col gap-0.5">
-                                    <div className="text-[14px] font-semibold text-[#1a1f36] flex items-center gap-3">
-                                        {formatId(tx.id || tx._id)}
-                                        {/* Status Badge */}
-                                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tight border ${getStatusStyle(tx.status)}`}>
-                                            {(tx.status || 'active').replace('_', ' ')}
-                                        </span>
-                                        {/* Action Menu attached to each item */}
-                                        <div className="relative">
+                            {/* Transaction ID */}
+                            <div className="text-[13px] font-semibold text-[#1a1f36] flex items-center gap-3">
+                                {formatId(tx.id || tx._id)}
+                            </div>
+
+                            {/* Date & Time */}
+                            <div className="text-[13px] text-[#64748b] font-medium whitespace-nowrap">
+                                {formatDate(tx.createdAt)}
+                            </div>
+
+                            {/* Platform */}
+                            <div className="text-[13px] font-bold text-[#1a1f36]">
+                                {(tx.platform || 'System').toUpperCase()}
+                            </div>
+
+                            {/* Status */}
+                            <div>
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight border ${getStatusStyle(tx.status)}`}>
+                                    {(tx.status || 'active').replace('_', ' ')}
+                                </span>
+                            </div>
+
+                            {/* Type & Amount */}
+                            <div className="flex flex-col">
+                                <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">
+                                    {tx.type || 'Transaction'}
+                                </span>
+                                <span className="text-[14px] font-black text-brand-600">
+                                    € {Number(tx.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                            </div>
+
+                            {/* Action Menu attached to each item */}
+                            <div className="relative w-8 flex justify-end">
+                                <button 
+                                    onClick={() => setOpenMenuId(openMenuId === (tx.id || tx._id) ? null : (tx.id || tx._id))}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 text-neutral-400 hover:text-indigo-600 rounded-md hover:bg-white border border-transparent hover:border-neutral-200 shadow-sm"
+                                >
+                                    <FiMoreHorizontal size={16} />
+                                </button>
+                                
+                                {openMenuId === (tx.id || tx._id) && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                                        <div className="absolute right-0 top-8 mt-1 w-44 bg-white rounded-xl border border-neutral-100 shadow-xl z-20 py-1.5 overflow-hidden">
                                             <button 
-                                                onClick={() => setOpenMenuId(openMenuId === (tx.id || tx._id) ? null : (tx.id || tx._id))}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-neutral-400 hover:text-indigo-600 rounded-md hover:bg-white border border-transparent hover:border-neutral-200 shadow-sm"
+                                                onClick={() => { onViewDetail(tx); setOpenMenuId(null); }}
+                                                className="w-full flex items-center gap-3 px-4 py-2 text-[12px] font-bold uppercase tracking-wide text-neutral-600 hover:bg-[#f8f9fc] hover:text-indigo-600 transition-colors"
                                             >
-                                                <FiMoreHorizontal size={14} />
+                                                <FiEye size={15} /> View Details
                                             </button>
-                                            
-                                            {openMenuId === (tx.id || tx._id) && (
-                                                <>
-                                                    <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
-                                                    <div className="absolute left-0 mt-1 w-44 bg-white rounded-xl border border-neutral-100 shadow-xl z-20 py-1.5 overflow-hidden">
-                                                        <button 
-                                                            onClick={() => { onViewDetail(tx); setOpenMenuId(null); }}
-                                                            className="w-full flex items-center gap-3 px-4 py-2 text-[12px] font-bold uppercase tracking-wide text-neutral-600 hover:bg-[#f8f9fc] hover:text-indigo-600 transition-colors"
-                                                        >
-                                                            <FiEye size={15} /> View Details
-                                                        </button>
-                                                        {!isAdmin && (tx.status === 'active' || !tx.status) && (
-                                                            <button 
-                                                                onClick={() => { navigate(`/dashboard/transactions/${tx.id || tx._id}/change-request`); setOpenMenuId(null); }}
-                                                                className="w-full flex items-center gap-3 px-4 py-2 text-[12px] font-bold uppercase tracking-wide text-indigo-600 hover:bg-indigo-50 transition-colors"
-                                                            >
-                                                                <FiEdit3 size={14} /> Request Change
-                                                            </button>
-                                                        )}
-                                                        {isAdmin && (
-                                                            <button className="w-full flex items-center gap-3 px-4 py-2 text-[12px] font-bold uppercase tracking-wide text-[#2563eb] hover:bg-[#eff6ff] transition-colors">
-                                                                <FiCheckCircle size={15} /> Action Record
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </>
+                                            {!isAdmin && (tx.status === 'active' || !tx.status) && (
+                                                <button 
+                                                    onClick={() => { navigate(`/dashboard/transactions/${tx.id || tx._id}/change-request`); setOpenMenuId(null); }}
+                                                    className="w-full flex items-center gap-3 px-4 py-2 text-[12px] font-bold uppercase tracking-wide text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                                >
+                                                    <FiEdit3 size={14} /> Request Change
+                                                </button>
+                                            )}
+                                            {isAdmin && (
+                                                <button className="w-full flex items-center gap-3 px-4 py-2 text-[12px] font-bold uppercase tracking-wide text-[#2563eb] hover:bg-[#eff6ff] transition-colors">
+                                                    <FiCheckCircle size={15} /> Action Record
+                                                </button>
                                             )}
                                         </div>
-                                    </div>
-                                    <div className="text-[13px] text-[#8792a2] font-medium">
-                                        to {formatId(tx.staffId?._id || tx.staffId || 'System')}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="text-[14px] text-[#64748b] font-medium whitespace-nowrap pl-4">
-                                {formatDate(tx.createdAt)}
+                                    </>
+                                )}
                             </div>
                         </motion.div>
                     ))}

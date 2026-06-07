@@ -79,3 +79,15 @@
     background: #5B58EB;
   }
 }
+
+/* Utility to hide scrollbar while keeping scroll functionality */
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}

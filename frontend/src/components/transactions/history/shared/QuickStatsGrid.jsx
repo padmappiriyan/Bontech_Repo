@@ -75,7 +75,7 @@ const QuickStatsGrid = React.memo(({ stats, loading }) => {
 
     const cards = [
         {
-            title: "Total Volume",
+            title: "Total Balance",
             value: `€ ${summary.totalVolume.toLocaleString()}`,
             subtitle: "EUR",
             icon: FiActivity,

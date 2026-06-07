@@ -20,6 +20,7 @@ import AdminChangeRequestReviewPage from './pages/dashboard/admin/AdminChangeReq
 import AdminReportsPage from './pages/dashboard/admin/AdminReportsPage';
 import UserRecordsPage from './pages/dashboard/admin/UserRecordsPage';
 import ExcelPage from './pages/dashboard/common/ExcelPage';
+import TransactionHistoryPage from './pages/dashboard/common/TransactionHistoryPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import LandingLayout from './components/layout/LandingLayout';
 
@@ -48,6 +49,7 @@ function App() {
 
             {/* Common shared routes */}
             <Route path="/dashboard/transactions" element={<TransactionsPage />} />
+            <Route path="/dashboard/transaction-history" element={<TransactionHistoryPage />} />
             <Route path="/dashboard/transactions/:id/change-request" element={<ChangeRequestPage />} />
             <Route path="/dashboard/change-requests" element={<ChangeRequestListPage />} />
             <Route path="/dashboard/profile" element={<ProfilePage />} />
