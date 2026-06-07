@@ -108,6 +108,9 @@ const TimelineEntry = ({ log, idx, isLast }) => {
     const currency = log.transactionId?.currency || 'EUR';
     const userEmail = log.userId?.email || 'System';
     const timeStr = format(new Date(log.timestamp), 'HH:mm:ss');
+    
+    const receiverName = log.details?.receiverName || log.transactionId?.receiverName;
+    const senderName = log.details?.senderName || log.transactionId?.senderName;
 
     return (
         <motion.div
@@ -146,11 +149,17 @@ const TimelineEntry = ({ log, idx, isLast }) => {
                         </span>
                     )}
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
-                    {log.details?.ipAddress && (
-                        <span>IP Address: {log.details.ipAddress}</span>
+                <div className="flex items-center gap-3 text-[12px] text-neutral-500 font-medium">
+                    {receiverName && (
+                        <span>Receiver: <span className="font-bold text-neutral-700">{receiverName}</span></span>
                     )}
-                    {log.details?.ipAddress && log.details?.peer && <span> Peer: {log.details.peer}</span>}
+                    {senderName && (
+                        <span>Sender: <span className="font-bold text-neutral-700">{senderName}</span></span>
+                    )}
+                    {log.details?.ipAddress && (
+                        <span className="text-[11px]">IP Address: {log.details.ipAddress}</span>
+                    )}
+                    {log.details?.ipAddress && log.details?.peer && <span className="text-[11px]">Peer: {log.details.peer}</span>}
                 </div>
             </div>
         </motion.div>
@@ -368,7 +377,7 @@ const AuditLogsPage = () => {
                     )}
 
                     {/* Timeline */}
-                    <div className="bg-white rounded-3xl border border-neutral-100 shadow-sm p-6 min-h-[500px]">
+                    <div className="bg-white rounded-3xl border border-neutral-100 shadow-sm p-6 min-h-[500px] max-h-[600px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         <AnimatePresence mode="popLayout">
                             {!loading && logs.length === 0 ? (
                                 <motion.div

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { format } from 'date-fns';
+import { format, startOfDay, isAfter } from 'date-fns';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { getPlatformStyle } from '../../utils/platformStyles';
 import { formatCurrencyAmount } from '../../utils/currency';
@@ -9,9 +9,44 @@ const ExcelPlatformTable = ({ platform, rows, onRowChange, selectedMonth, onPrev
     const style = getPlatformStyle(platform.name, platform.slug);
     const Icon = style.icon;
 
+    const cascadedRows = useMemo(() => {
+        let prevBalance = 0;
+        const today = startOfDay(new Date());
+        
+        return rows.map((row, index) => {
+            const sendAmt = parseAmount(row.send);
+            const paidAmt = parseAmount(row.paid);
+            const depAmt = parseAmount(row.deposit);
+            const isFutureDate = isAfter(startOfDay(row.date), today);
+            
+            let computedBf;
+            if (index === 0) {
+                computedBf = parseAmount(row.bf);
+            } else if (isFutureDate && sendAmt === 0 && paidAmt === 0 && depAmt === 0) {
+                // Do not cascade to future dates if they have no activity
+                computedBf = 0;
+            } else {
+                computedBf = prevBalance;
+            }
+
+            const computedBalance = computedBf + sendAmt - paidAmt - depAmt;
+            if (!isFutureDate || (sendAmt !== 0 || paidAmt !== 0 || depAmt !== 0)) {
+                prevBalance = computedBalance;
+            } else {
+                prevBalance = 0; // Reset prevBalance for future inactive dates
+            }
+
+            return {
+                ...row,
+                cascadedBf: index === 0 ? row.bf : (computedBf === 0 ? '' : String(computedBf)),
+                computedBalance
+            };
+        });
+    }, [rows]);
+
     const totals = useMemo(
         () =>
-            rows.reduce(
+            cascadedRows.reduce(
                 (acc, row) => ({
                     send: acc.send + parseAmount(row.send),
                     paid: acc.paid + parseAmount(row.paid),
@@ -19,7 +54,7 @@ const ExcelPlatformTable = ({ platform, rows, onRowChange, selectedMonth, onPrev
                 }),
                 { send: 0, paid: 0, deposit: 0 }
             ),
-        [rows]
+        [cascadedRows]
     );
 
     const handleChange = (dateKey, field, rawValue) => {
@@ -81,7 +116,7 @@ const ExcelPlatformTable = ({ platform, rows, onRowChange, selectedMonth, onPrev
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-100">
-                        {rows.map((row) => (
+                        {cascadedRows.map((row, index) => (
                             <tr
                                 key={row.dateKey}
                                 className="bg-white hover:bg-neutral-50/50 transition-colors"
@@ -89,20 +124,31 @@ const ExcelPlatformTable = ({ platform, rows, onRowChange, selectedMonth, onPrev
                                 <td className="px-6 py-3 font-bold text-neutral-600 whitespace-nowrap">
                                     {format(row.date, 'dd/MM/yyyy')}
                                 </td>
-                                {['bf', 'send', 'paid', 'deposit'].map((field) => (
-                                    <td key={field} className="px-4 py-2 text-center">
-                                        <input
-                                            type="text"
-                                            inputMode="decimal"
-                                            value={row[field] || ''}
-                                            onChange={(e) => handleChange(row.dateKey, field, e.target.value)}
-                                            className="w-full h-9 px-2 text-center rounded-lg border border-transparent bg-transparent hover:bg-neutral-50 focus:bg-white focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none font-semibold text-neutral-700 tabular-nums transition-all placeholder:text-neutral-300"
-                                            placeholder="-"
-                                        />
-                                    </td>
-                                ))}
+                                {['bf', 'send', 'paid', 'deposit'].map((field) => {
+                                    const isBf = field === 'bf';
+                                    const isDisabled = isBf && index > 0;
+                                    const val = isBf ? (row.cascadedBf || '') : (row[field] || '');
+                                    
+                                    return (
+                                        <td key={field} className="px-4 py-2 text-center">
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={val}
+                                                onChange={(e) => handleChange(row.dateKey, field, e.target.value)}
+                                                disabled={isDisabled}
+                                                className={`w-full h-9 px-2 text-center rounded-lg border border-transparent bg-transparent tabular-nums transition-all placeholder:text-neutral-300 ${
+                                                    isDisabled 
+                                                        ? 'text-neutral-400 font-bold bg-neutral-50/50 cursor-not-allowed' 
+                                                        : 'hover:bg-neutral-50 focus:bg-white focus:border-brand-300 focus:ring-2 focus:ring-brand-100 outline-none font-semibold text-neutral-700'
+                                                }`}
+                                                placeholder="-"
+                                            />
+                                        </td>
+                                    );
+                                })}
                                 <td className="px-6 py-3 text-right font-black text-neutral-900 tabular-nums">
-                                    {formatCurrencyAmount(computeBalance(row.bf, row.send, row.paid, row.deposit))}
+                                    {formatCurrencyAmount(row.computedBalance)}
                                 </td>
                             </tr>
                         ))}
