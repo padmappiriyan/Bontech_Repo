@@ -63,6 +63,66 @@ export const loadLedgerTableDataForUser = (user) => {
     }
 };
 
+/**
+ * Load and aggregate ledger table data for ALL active users.
+ */
+export const loadLedgerTableDataForAllUsers = (users) => {
+    const aggregatedData = {};
+
+    users.forEach(user => {
+        // Only include active users in the aggregation
+        if (user.status === 'inactive') return;
+
+        const userData = loadLedgerTableDataForUser(user);
+        
+        Object.keys(userData).forEach(platformKey => {
+            if (!aggregatedData[platformKey]) {
+                aggregatedData[platformKey] = {};
+            }
+            
+            Object.keys(userData[platformKey]).forEach(monthKey => {
+                if (!aggregatedData[platformKey][monthKey]) {
+                    const [year, month] = monthKey.split('-');
+                    const monthDate = new Date(year, month - 1, 1);
+                    aggregatedData[platformKey][monthKey] = buildMonthRows(monthDate);
+                }
+                
+                const userMonthRows = userData[platformKey][monthKey];
+                const aggMonthRows = aggregatedData[platformKey][monthKey];
+                
+                userMonthRows.forEach(userRow => {
+                    const aggRowIndex = aggMonthRows.findIndex(r => r.dateKey === userRow.dateKey);
+                    if (aggRowIndex !== -1) {
+                        const aggRow = { ...aggMonthRows[aggRowIndex] };
+                        
+                        const currentBf = parseAmount(aggRow.bf);
+                        const userBf = parseAmount(userRow.bf);
+                        if (currentBf > 0 || userBf > 0) aggRow.bf = String(currentBf + userBf);
+
+                        const currentSend = parseAmount(aggRow.send);
+                        const userSend = parseAmount(userRow.send);
+                        if (currentSend > 0 || userSend > 0) aggRow.send = String(currentSend + userSend);
+                        
+                        const currentPaid = parseAmount(aggRow.paid);
+                        const userPaid = parseAmount(userRow.paid);
+                        if (currentPaid > 0 || userPaid > 0) aggRow.paid = String(currentPaid + userPaid);
+                        
+                        const currentDeposit = parseAmount(aggRow.deposit);
+                        const userDeposit = parseAmount(userRow.deposit);
+                        if (currentDeposit > 0 || userDeposit > 0) aggRow.deposit = String(currentDeposit + userDeposit);
+                        
+                        aggRow.balance = parseAmount(aggRow.bf) + parseAmount(aggRow.send) - parseAmount(aggRow.paid) - parseAmount(aggRow.deposit);
+                        
+                        aggMonthRows[aggRowIndex] = aggRow;
+                    }
+                });
+            });
+        });
+    });
+
+    return aggregatedData;
+};
+
 export const saveLedgerTableData = (tableData, { notify = true } = {}) => {
     localStorage.setItem(getStorageKey(), JSON.stringify(tableData));
     if (notify) {

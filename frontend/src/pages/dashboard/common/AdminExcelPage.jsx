@@ -24,6 +24,7 @@ import {
 import {
     loadLedgerTableData,
     loadLedgerTableDataForUser,
+    loadLedgerTableDataForAllUsers,
     saveLedgerTableData,
     LEDGER_UPDATED_EVENT
 } from '../../../utils/excelLedgerStorage';
@@ -86,12 +87,16 @@ const AdminExcelPage = () => {
     // Reload ledger data whenever a different user is selected
     useEffect(() => {
         if (selectedUser) {
-            setTableData(loadLedgerTableDataForUser(selectedUser));
+            if (selectedUser.id === 'ALL_USERS_SPECIAL_ID') {
+                setTableData(loadLedgerTableDataForAllUsers(allUsers));
+            } else {
+                setTableData(loadLedgerTableDataForUser(selectedUser));
+            }
             setSelectedMonths({});
         } else {
             setTableData({});
         }
-    }, [selectedUser]);
+    }, [selectedUser, allUsers]);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -112,10 +117,16 @@ const AdminExcelPage = () => {
 
     useEffect(() => {
         if (!selectedUser) return;
-        const handleLedgerUpdate = () => setTableData(loadLedgerTableDataForUser(selectedUser));
+        const handleLedgerUpdate = () => {
+            if (selectedUser.id === 'ALL_USERS_SPECIAL_ID') {
+                setTableData(loadLedgerTableDataForAllUsers(allUsers));
+            } else {
+                setTableData(loadLedgerTableDataForUser(selectedUser));
+            }
+        };
         window.addEventListener(LEDGER_UPDATED_EVENT, handleLedgerUpdate);
         return () => window.removeEventListener(LEDGER_UPDATED_EVENT, handleLedgerUpdate);
-    }, [selectedUser]);
+    }, [selectedUser, allUsers]);
 
     useEffect(() => {
         loadActivePlatforms();
@@ -135,6 +146,13 @@ const AdminExcelPage = () => {
 
     const activeUsers = filteredUsers.filter(u => u.status !== 'inactive');
     const inactiveUsers = filteredUsers.filter(u => u.status === 'inactive');
+
+    const ALL_USERS_MOCK = {
+        id: 'ALL_USERS_SPECIAL_ID',
+        name: 'All Users (Total)',
+        email: 'Aggregated view for active users',
+        status: 'active'
+    };
 
     const ensureMonthRows = useCallback((prev, platformId, monthDate) => {
         const key = format(monthDate, 'yyyy-MM');
@@ -307,9 +325,12 @@ const AdminExcelPage = () => {
                             </div>
                         ) : (
                             <>
+                                <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest px-4 py-2">Global</p>
+                                <UserListItem user={ALL_USERS_MOCK} />
+                                
                                 {activeUsers.length > 0 && (
                                     <>
-                                        <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest px-4 py-2">Active</p>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest px-4 py-2 mt-2">Active</p>
                                         {activeUsers.map(u => <UserListItem key={u.id || u._id} user={u} />)}
                                     </>
                                 )}
@@ -392,16 +413,21 @@ const AdminExcelPage = () => {
                                                     selectedMonth={platformMonth}
                                                     onPrevMonth={() => setSelectedMonths((prev) => ({ ...prev, [platformKey]: subMonths(platformMonth, 1) }))}
                                                     onNextMonth={() => setSelectedMonths((curr) => ({ ...curr, [platformKey]: addMonths(platformMonth, 1) }))}
+                                                    readOnly={selectedUser.id === 'ALL_USERS_SPECIAL_ID'}
                                                 />
                                             );
                                         })}
                                     </div>
 
-                                    <div className="mb-4">
-                                        <UserReconciliationHistory userId={selectedUser?.id || selectedUser?._id} />
-                                    </div>
+                                    {selectedUser.id !== 'ALL_USERS_SPECIAL_ID' && (
+                                        <div className="mb-4">
+                                            <UserReconciliationHistory userId={selectedUser?.id || selectedUser?._id} />
+                                        </div>
+                                    )}
 
-                                    <ExcelEntryForm platforms={platforms} onSubmit={handleEntrySubmit} />
+                                    {selectedUser.id !== 'ALL_USERS_SPECIAL_ID' && (
+                                        <ExcelEntryForm platforms={platforms} onSubmit={handleEntrySubmit} />
+                                    )}
                                 </>
                             )}
                         </div>

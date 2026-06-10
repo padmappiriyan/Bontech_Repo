@@ -5,7 +5,7 @@ import { getPlatformStyle } from '../../utils/platformStyles';
 import { formatCurrencyAmount } from '../../utils/currency';
 import { parseAmount, computeBalance, getPlatformKey } from '../../utils/excelLedger';
 
-const ExcelPlatformTable = ({ platform, rows, onRowChange, selectedMonth, onPrevMonth, onNextMonth }) => {
+const ExcelPlatformTable = ({ platform, rows, onRowChange, selectedMonth, onPrevMonth, onNextMonth, readOnly = false }) => {
     const style = getPlatformStyle(platform.name, platform.slug);
     const Icon = style.icon;
 
@@ -126,7 +126,7 @@ const ExcelPlatformTable = ({ platform, rows, onRowChange, selectedMonth, onPrev
                                 </td>
                                 {['bf', 'send', 'paid', 'deposit'].map((field) => {
                                     const isBf = field === 'bf';
-                                    const isDisabled = isBf && index > 0;
+                                    const isDisabled = (isBf && index > 0) || readOnly;
                                     const val = isBf ? (row.cascadedBf || '') : (row[field] || '');
                                     
                                     return (
