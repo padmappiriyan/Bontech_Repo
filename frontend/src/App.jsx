@@ -9,7 +9,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import UsersPage from './pages/dashboard/admin/UsersPage';
 import ActivityPage from './pages/dashboard/common/ActivityPage';
 import ProfilePage from './pages/dashboard/common/ProfilePage';
-import TransactionsPage from './pages/dashboard/common/TransactionsPage';
+// import TransactionsPage from './pages/dashboard/common/TransactionsPage';
 import ChangeRequestPage from './pages/dashboard/common/ChangeRequestPage';
 import ChangeRequestListPage from './pages/dashboard/common/ChangeRequestListPage';
 import AuditLogsPage from "./pages/dashboard/common/AuditLogsPage";
@@ -20,6 +20,7 @@ import AdminChangeRequestReviewPage from './pages/dashboard/admin/AdminChangeReq
 import AdminReportsPage from './pages/dashboard/admin/AdminReportsPage';
 import UserRecordsPage from './pages/dashboard/admin/UserRecordsPage';
 import ExcelPage from './pages/dashboard/common/ExcelPage';
+import AdminExcelPage from './pages/dashboard/common/AdminExcelPage';
 import TransactionHistoryPage from './pages/dashboard/common/TransactionHistoryPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import LandingLayout from './components/layout/LandingLayout';
@@ -48,7 +49,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
 
             {/* Common shared routes */}
-            <Route path="/dashboard/transactions" element={<TransactionsPage />} />
+            {/* <Route path="/dashboard/transactions" element={<TransactionsPage />} /> */}
             <Route path="/dashboard/transaction-history" element={<TransactionHistoryPage />} />
             <Route path="/dashboard/transactions/:id/change-request" element={<ChangeRequestPage />} />
             <Route path="/dashboard/change-requests" element={<ChangeRequestListPage />} />
@@ -56,7 +57,11 @@ function App() {
             <Route path="/dashboard/audit-logs" element={<AuditLogsPage />} />
             <Route path="/dashboard/activity-timeline" element={<ActivityPage />} />
             <Route path="/dashboard/rates" element={<RatesPage />} />
-            <Route path="/dashboard/excel" element={<ExcelPage />} />
+            <Route path="/dashboard/excel" element={
+              userInfo?.role === 'admin'
+                ? <AdminExcelPage />
+                : <ExcelPage />
+            } />
 
             {/* Consolidated Reports Route — Logic inside component handles role branching */}
             <Route path="/dashboard/reports" element={

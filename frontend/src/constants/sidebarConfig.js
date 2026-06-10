@@ -5,7 +5,7 @@ import { FiGrid, FiDollarSign, FiGitPullRequest, FiUsers, FiShield, FiActivity, 
  */
 const COMMON_ITEMS = {
   DASHBOARD: { label: 'Dashboard', path: '/dashboard', icon: FiGrid },
-  TRANSACTIONS: { label: 'Transactions', path: '/dashboard/transactions', icon: FiDollarSign },
+  // TRANSACTIONS: { label: 'Transactions', path: '/dashboard/transactions', icon: FiDollarSign },
   TRANSACTION_HISTORY: { label: 'Transaction History', path: '/dashboard/transaction-history', icon: FiFileText },
   CHANGE_REQUESTS: { label: 'Change Requests', path: '/dashboard/change-requests', icon: FiGitPullRequest },
   AUDIT_LOGS: { label: 'Audit Logs', path: '/dashboard/audit-logs', icon: FiShield },
@@ -21,7 +21,7 @@ const COMMON_ITEMS = {
 export const SIDEBAR_CONFIG = {
   admin: [
     COMMON_ITEMS.DASHBOARD,
-    COMMON_ITEMS.TRANSACTIONS,
+    // COMMON_ITEMS.TRANSACTIONS,
     COMMON_ITEMS.TRANSACTION_HISTORY,
     { label: 'Source Brands', path: '/dashboard/platforms', icon: FiLayers },
     { label: 'Global Rates', path: '/dashboard/rates', icon: FiTrendingUp },
@@ -36,7 +36,7 @@ export const SIDEBAR_CONFIG = {
   ],
   supervisor: [
     COMMON_ITEMS.DASHBOARD,
-    COMMON_ITEMS.TRANSACTIONS,
+    // COMMON_ITEMS.TRANSACTIONS,
     COMMON_ITEMS.TRANSACTION_HISTORY,
     { label: 'Market Rates', path: '/dashboard/rates', icon: FiTrendingUp },
     COMMON_ITEMS.CHANGE_REQUESTS,
@@ -47,7 +47,7 @@ export const SIDEBAR_CONFIG = {
   ],
   user: [
     COMMON_ITEMS.DASHBOARD,
-    COMMON_ITEMS.TRANSACTIONS,
+    // COMMON_ITEMS.TRANSACTIONS,
     COMMON_ITEMS.TRANSACTION_HISTORY,
     COMMON_ITEMS.EXCEL,
     COMMON_ITEMS.CHANGE_REQUESTS,

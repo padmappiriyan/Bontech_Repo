@@ -48,6 +48,21 @@ export const loadLedgerTableData = () => {
     }
 };
 
+/**
+ * Load ledger table data for a SPECIFIC user (used by admin to view other users' records).
+ * @param {{ email?: string, _id?: string, id?: string }} user
+ */
+export const loadLedgerTableDataForUser = (user) => {
+    try {
+        const userId = user?.email || user?._id || user?.id || 'guest';
+        const key = `mttms_excel_ledger_v1_${userId}`;
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+};
+
 export const saveLedgerTableData = (tableData, { notify = true } = {}) => {
     localStorage.setItem(getStorageKey(), JSON.stringify(tableData));
     if (notify) {
