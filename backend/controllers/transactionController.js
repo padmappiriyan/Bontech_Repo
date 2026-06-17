@@ -99,6 +99,7 @@ const createTransaction = asyncHandler(async (req, res) => {
  * @access  Private (Admin/Supervisor sees all; Staff sees OWN)
  */
 const getTransactions = asyncHandler(async (req, res) => {
+    const { platform, type, startDate, endDate, keyword } = req.query;
     const pageSize = Number(req.query.pageSize) || 20;
     const page = Number(req.query.pageNumber) || 1;
 
@@ -147,7 +148,7 @@ const getTransactions = asyncHandler(async (req, res) => {
         .skip(pageSize * (page - 1))
         .sort({ createdAt: -1 });
 
-
+    console.log(transactions);
 
     res.json({
         success: true,
@@ -224,7 +225,7 @@ const getLedgerTransactions = asyncHandler(async (req, res) => {
         .limit(pageSize)
         .skip(pageSize * (page - 1))
         .sort({ createdAt: -1 });
-
+    
     res.json({
         success: true,
         data: transactions,

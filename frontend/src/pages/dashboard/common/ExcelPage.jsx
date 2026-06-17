@@ -227,6 +227,7 @@ const ExcelPage = () => {
                                     selectedMonth={platformMonth}
                                     onPrevMonth={() => setSelectedMonths((prev) => ({ ...prev, [platformKey]: subMonths(platformMonth, 1) }))}
                                     onNextMonth={() => setSelectedMonths((current) => ({ ...current, [platformKey]: addMonths(platformMonth, 1) }))}
+                                    readOnly={true}
                                 />
                             );
                         })}

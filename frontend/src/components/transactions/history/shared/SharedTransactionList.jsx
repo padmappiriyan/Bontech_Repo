@@ -51,7 +51,7 @@ const SharedTransactionList = ({
     };
 
     return (
-        <div className="bg-white rounded-[1.5rem] p-6 lg:p-8 w-full border border-neutral-100 shadow-sm relative overflow-hidden h-full flex flex-col">
+        <div className="bg-white rounded-2xl p-6 lg:p-8 w-full  shadow-sm relative overflow-hidden h-full flex flex-col">
             {/* Header section matching Image 3 precisely */}
             <div className="flex items-center justify-between mb-8">
                 <h2 className="text-[#1a1f36] text-[17px] font-bold tracking-tight">Transactions history</h2>
@@ -89,7 +89,7 @@ const SharedTransactionList = ({
             </div>
 
             {/* Table Header */}
-            <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl mb-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+            <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-4 py-3 bg-neutral-50  rounded-xl mb-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
                 <div>Transaction ID</div>
                 <div>Date & Time</div>
                 <div>Platform</div>
