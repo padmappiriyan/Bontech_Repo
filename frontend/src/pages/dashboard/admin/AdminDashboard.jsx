@@ -4,7 +4,7 @@ import { getUserStats } from '../../../api/userApi';
 import CircularRoleChart, { ChartLegend } from '../../../components/dashboard/CircularRoleChart';
 import StatCircles from '../../../components/dashboard/StatCircles';
 import AdminOverviewMetrics from '../../../components/dashboard/AdminOverviewMetrics';
-import PlatformDistributionChart from '../../../components/dashboard/admin/PlatformDistributionChart';
+// import PlatformDistributionChart from '../../../components/dashboard/admin/PlatformDistributionChart';
 import AdminFilterPanel from '../../../components/dashboard/admin/AdminFilterPanel';
 import UserLedgerTable from '../../../components/dashboard/admin/UserLedgerTable';
 import { getGlobalPlatformBalances } from '../../../api/userBalanceApi';
@@ -132,10 +132,10 @@ const AdminDashboard = ({ userInfo }) => {
                 />
             </section>
 
-            {/* ── Section 2: Platform Distribution Analytics ── */}
-            <div className="px-1">
+            {/* ── Section 2: Platform Distribution Analytics (hidden for now) ── */}
+            {/* <div className="px-1">
                 <PlatformDistributionChart />
-            </div>
+            </div> */}
 
             {/* ── Section 3: Filter System ── */}
             <section className="px-1">
