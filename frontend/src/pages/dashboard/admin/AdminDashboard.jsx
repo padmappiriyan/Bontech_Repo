@@ -124,7 +124,7 @@ const AdminDashboard = ({ userInfo }) => {
                     totalUsers={stats.total}
                     data={globalBalances ? {
                         broughtFwd: globalBalances.totalOpeningBalance,
-                        totalSend: globalBalances.totalSpend,
+                        totalSend: globalBalances.totalSend,
                         totalDeposit: globalBalances.totalDeposit,
                         totalPaid: globalBalances.totalPaid,
                         platformNet: globalBalances.totalCurrentBalance
